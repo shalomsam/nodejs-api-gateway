@@ -1,0 +1,17 @@
+.App {
+  /* text-align: center; */
+  padding: 20px;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+.actionWrp {
+  margin: 20px 0;
+}
