@@ -9,7 +9,7 @@ const BASE_URL = process.env.URL || `http://${DOMAIN}:${PORT}`;
 const defaultRedireUrl = `${BASE_URL}/r`;
 const urlShortnerBaseUrl = process.env.BASE_URL && `${process.env.BASE_URL}/r` || defaultRedireUrl;
 
-const mongoUrl = process.env.MONGO_CONNECTION_STRING || 'mongodb://mongo/test2';
+const mongoUrl = process.env.MONGO_CONNECTION_STRING || 'mongodb://mongo/tokenmanager';
 mongoose.connect(mongoUrl, { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true } ).then(
     () => { 
         /** ready to use. The `mongoose.connect()` promise resolves to undefined. */
@@ -20,25 +20,27 @@ mongoose.connect(mongoUrl, { useNewUrlParser: true, useCreateIndex: true, useUni
     // process.exit();
 });
 
-export interface IShortUrl extends Document {
-    httpCode: number;
-    longUrl: string;
-    shortPath: string;
+export interface RegisteredApp extends Document {
+    name: String;
+    secret: String;
+    apiKey: String;
+    redirectUrls: String[];
     createdOn: Date;
     startDate: Date;
     endDate: Date;
 }
 
-const ShortUrlSchema: Schema = new Schema({
-    httpCode: { type: Number, required: false, default: 301 },
-    longUrl: { type: String, required: true },
-    shortPath: { type: String, required: true, unique: true },
+const RegisteredAppSchema: Schema = new Schema({
+    name: { type: String, required: true, unique: true },
+    secret: { type: String, required: true, unique: true },
+    apiKey: { type: String, required: true, unique: true },
+    redirectUrls: { type: Array, required: true, unique: true },
     createdOn: { type: Date, required: true },
     startDate: { type: Date, required: false },
     endDate: { type: Date, required: false },
 });
 
-const ShortUrlModel = mongoose.model<IShortUrl>('ShortUrl', ShortUrlSchema);
+const RegisteredAppModel = mongoose.model<RegisteredApp>('ShortUrl', RegisteredAppSchema);
 
 const app = express();
 
@@ -47,115 +49,65 @@ app.set("port", PORT);
 app.set("baseUrl", BASE_URL);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-// Todo: add auth
 
-app.get('/r/:shortPath', async (req: express.Request, res: express.Response) => {
-    const response = await ShortUrlModel.findOne({ shortPath: req.params.shortPath });
-    const redirectCode = response.httpCode;
-    const redirectUrl = response.longUrl;
-    // Todo: sendAnalytics(req, response)
-    // Todo: checkExpired()
-    return res.redirect(redirectCode, redirectUrl);
-});
+// ===============
+// Token
 
-// Todo: configurations in DB?
-app.get('/api/config', async (req: express.Request, res: express.Response) => {
-    return res.json({
-        baseUrl: BASE_URL,
-        urlShortnerBaseUrl
-    });
-});
+const apiKeyHandle = "tmApiKey";
+const notFoundJson = {
+    status: 'error',
+    statusCode: 400,
+    message: 'Not Found'
+};
 
-// Todo: move to controller files
-app.get('/api/shorturl', async (req: express.Request, res: express.Response) => {
-    let list: object;
-    try {
-        list = await ShortUrlModel.find();
-    } catch (e) {
-        list = e;
+interface tokenPayload {
+    name?: string;
+    userId?: string;
+    csrfToken?: string;
+    iat?: string;
+}
+
+const getApiKey = (req: express.Request) => {
+    if (req?.query[apiKeyHandle]) {
+        return req.query[apiKeyHandle];
+    } else if (req?.header[`x-${apiKeyHandle}`]) {
+        return req.header[`x-${apiKeyHandle}`];
+    } else if (req?.cookies[apiKeyHandle]) {
+        return req.cookies[apiKeyHandle];
     }
 
-    return res.json(list);
+    return null;
+}
+
+/**
+ * Get JWT Token
+ * ==============
+ * @param {tokenPayload} payload - payload as body.
+ * @param {string} apiKey - api key
+ */
+app.post('/api/token', async (req: express.Request, res: express.Response) => {
+    const apiKey = getApiKey(req);
+    if (!apiKey) {
+        return res.status(notFoundJson.statusCode).json(notFoundJson);
+    }
+
+    const registeredApp = await RegisteredAppModel.findOne({ apiKey });
+    if (!registeredApp) {
+        return res.status(notFoundJson.statusCode).json(notFoundJson);
+    }
+
+    const s = registeredApp.secret;
+
+    const payload = req.body as tokenPayload;
+    const header = { "alg": "custom", "typ": "JWT" };
+    const signature = ""
 });
 
-app.get('/api/shorturl/:id', async (req: express.Request, res: express.Response) => {
-    let list: object;
-    try {
-        list = await ShortUrlModel.findById(req.params.id);
-    } catch (e) {
-        list = e;
-    }
-    return res.json(list);
-});
-
-app.post('/api/shorturl', async (req: express.Request, res: express.Response) => {
-    let response = {};
-    const id = short.generate();
-    const createdOn = Date.now();
-    let shortUrlData = {
-        ...req.body,
-        createdOn,
-    };
-
-    if (!req.body.shortPath) {
-        const shortPath = id;
-        shortUrlData = {
-            ...shortUrlData,
-            shortPath,
-        };
-    } else if (req.body.shortPath) {
-        let shortPath = req.body.shortPath.trim('/');
-        shortUrlData = {
-            ...shortUrlData,
-            shortPath,
-        };
-    }
-
-    try {
-        const shortUrl = new ShortUrlModel(shortUrlData);
-        response = await shortUrl.save();
-        response = {...shortUrl.toObject(), status: 'success'};
-    } catch (e) {
-        res.status(500);
-        response = e;
-    }
-
-    return res.json(response);
-});
-
-app.put('/api/shorturl/:id', async (req: express.Request, res: express.Response) => {
-    let response: any = {};
-    try {
-        response = await ShortUrlModel.findByIdAndUpdate(req.params.id, req.body, { upsert: true });
-
-        if(!response && !response._id) {
-            return res.status(404).send({
-                message: "Note not found with id " + req.params.id
-            });
-        }
-    } catch (e) {
-        res.status(404);
-        response = e;
-    }
-
-    return res.json(response);
-});
-
-app.delete('/api/shorturl/:id', async (req: express.Request, res: express.Response) => {
-    let response = {};
-    try {
-        response = await ShortUrlModel.findByIdAndDelete(req.params.id);
-        if(!response) {
-            return res.status(404).send({
-                message: "Note not found with id " + req.params.id
-            });
-        }
-    } catch (e) {
-        res.status(500);
-        response = e;
-    }
-
-    return res.json(response);
+/**
+ * Validate JWT token
+ */
+app.post('/api/token/validate', async (req: express.Request, res: express.Response) => {
+    
 });
 
 export default app;
