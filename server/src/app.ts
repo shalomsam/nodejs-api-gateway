@@ -64,7 +64,11 @@ interface tokenPayload {
     name?: string;
     userId?: string;
     csrfToken?: string;
-    iat?: string;
+    iss?: string,
+    sub?: string,
+    jti?: string,
+    iat?: number,
+    exp?: number
 }
 
 const getApiKey = (req: express.Request) => {
