@@ -1,7 +1,32 @@
 import crypto from 'crypto';
 
-class JwtProvider {
-    private algoKey = 'ES256';
+export interface IJwtHeader {
+    setAlgorithm(algo: string): void;
+    setType(type: string): void;
+    getAlgoType(): string;
+    toJson(): object;
+    toString(): string;
+}
+
+export interface Claims {
+    name?: string;
+    userId?: string;
+    csrfToken?: string;
+    iss?: string;
+    sub?: object | string;
+    jti?: string;
+    iat?: number;
+    exp?: number;
+    [key:string]: any;
+}
+
+export interface IJwtClaims extends Claims {
+    setExpiry(ttl: number): this;
+    setNotBefore(date?: Date | string): this;
+    setIssuedAt(date?: Date | string): this;
+}
+
+export class JwtHeader implements IJwtHeader {
     private algCryptoMap = {
         HS256: 'SHA256',
         HS384: 'SHA384',
@@ -25,11 +50,112 @@ class JwtProvider {
         ES384: 'sign',
         ES512: 'sign'
     };
+
+    public alg: string;
+    public typ: string;
+
+    constructor(algo?: string, type?: string) {
+        algo = algo || process.env.ALGO || 'ES256';
+
+        if (!this.algCryptoMap[algo]) {
+            throw new Error('Unsupported Algorithm: ' + algo);
+        }
+
+        this.alg = algo;
+        this.typ = type || 'JWT';
+
+        return this;
+    }
+
+    public setAlgorithm(algo: string): this {
+        this.alg = algo;
+
+        return this;
+    }
+
+    public setType(type: string): this {
+        this.typ = type;
+
+        return this;
+    }
+
+    public getAlgoType(): string {
+        return this.algTypeMap[this.alg];
+    }
+
+    public toJson(): object {
+        return {
+            alg: this.alg,
+            typ: this.typ
+        };
+    }
+
+    public toString(): string {
+        return JSON.stringify(this.toJson());
+    }
+}
+
+export class JwtClaim {
+
+    public userId?: string;
+    public csrfToken?: string;
+    public iss?: string;
+    public sub?: string;
+    public jti?: string;
+    public iat?: number;
+    public exp?: number;
+    public nbf?: number;
+
+    constructor(claims: object) {
+        for (var k in claims) {
+            this[k] = claims[k];
+        }
+        if (!this.exp) {
+            this.setExpiry(parseInt(process.env.TOKEN_TTL) || 1000);
+        }
+        if (!this.iat) {
+            this.setIssuedAt();
+        }
+        return this;
+    }
+
+    private safeDate(date: string | Date) {
+        let _date: Date;
+        if (!date) {
+            _date = new Date();
+        } else if (date !instanceof Date) {
+            _date = new Date(date);
+        }
+        return _date;
+    }
+
+    public setExpiry(ttl: number): this {
+        this.exp = ((new Date()).getTime() + ttl) / 1000;
+        return this;
+    }
+
+    public setNotBefore(date?: Date | string): this {
+        this.nbf = this.safeDate(date).getTime() / 1000;
+        return this;
+    }
+
+    public setIssuedAt(date?: Date | string): this {
+        this.iat = this.safeDate(date).getTime() / 1000;
+        return this;
+    }
+}
+
+class JwtProvider {
+
+    private header: IJwtHeader;
+    private claim: IJwtClaims;
+    private signature: string;
     
-    private head = {
-        alg: process.env.ALGO || this.algCryptoMap[this.algoKey],
-        typ: 'JWT'
-    };
+    constructor(segments?: any[]) {
+        this.header = new JwtHeader(segments[0]);
+        this.claim = new JwtClaim(segments[1]);
+        this.signature = segments[2];
+    }
 
     public base64urlencode(str: string): string {
         return this.urlEscape(Buffer.from(str, 'utf-8').toString('base64'));
@@ -50,16 +176,17 @@ class JwtProvider {
             .replace(/\//g, "_");
     }
 
-    private getAlgoFunction(algo: string = this.head.alg): string {
-        return this.algTypeMap[algo];
-    }
-
     public sign(head: string, body: string, secret: string = process.env.secret, base64encodeSecret: boolean = true): string {
-        const toSign = `${head}.${body}`;
+        const payload = `${head}.${body}`;
         secret = base64encodeSecret ? this.base64urlencode(secret) : secret;
 
-        const hash = crypto.createHmac(process.env.ALGO || 'sha256', secret);
-        return hash.update(toSign).digest('base64').toString();
+        if (this.getAlgoFn() === 'hmac') {
+            const hash = crypto.createHmac(this.algCryptoMap[this.algoKey], secret);
+            return hash.update(payload).digest('base64').toString();
+        } else {
+            const hash = crypto.createSign(this.algCryptoMap[this.algoKey]);
+            return hash.update(payload).sign(secret).toString('base64');
+        }
     }
 
     public jwt(payload: object, secret: string = process.env.secret, base64encodeSecret: boolean = true): string {
@@ -72,12 +199,19 @@ class JwtProvider {
     }
 
     public verify(jwtStr: string, secret: string = process.env.secret, base64encodeSecret: boolean = true): boolean {
-        const jwtArr = jwtStr.split('.');
-        const givenSign = jwtArr[2];
+        try {
+            const jwtArr = jwtStr.split('.');
+            const givenSign = jwtArr[2];
+            const head = jwtArr[0];
 
-        const sign = this.sign(jwtArr[0], jwtArr[1], secret, base64encodeSecret);
+            const sign = this.sign(jwtArr[0], jwtArr[1], secret, base64encodeSecret);
 
-        return givenSign === sign;
+            return givenSign === sign;
+
+        } catch (e) {
+            console.error('Token Verification Error: ', e);
+            return false;
+        }
     }
 }
 
