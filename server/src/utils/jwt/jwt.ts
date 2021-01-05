@@ -1,14 +1,20 @@
 import crypto from 'crypto';
 
-export interface IJwtHeader {
+export interface IJwtHead {
+    typ: string;
+    alg: string;
+}
+
+export interface IJwtHeader extends IJwtHead {
     setAlgorithm(algo: string): void;
     setType(type: string): void;
     getAlgoType(): string;
+    getCryptoAlgoName(): string;
     toJson(): object;
     toString(): string;
 }
 
-export interface Claims {
+export interface IClaims {
     name?: string;
     userId?: string;
     csrfToken?: string;
@@ -20,14 +26,17 @@ export interface Claims {
     [key:string]: any;
 }
 
-export interface IJwtClaims extends Claims {
+export interface IJwtClaims extends IClaims {
     setExpiry(ttl: number): this;
     setNotBefore(date?: Date | string): this;
     setIssuedAt(date?: Date | string): this;
+    toString(): string;
 }
 
+type Algorithms = keyof JwtHeader['algCryptoMap'];
+
 export class JwtHeader implements IJwtHeader {
-    private algCryptoMap = {
+    public algCryptoMap = {
         HS256: 'SHA256',
         HS384: 'SHA384',
         HS512: 'SHA512',
@@ -39,7 +48,7 @@ export class JwtHeader implements IJwtHeader {
         ES512: 'RSA-SHA512',
     };
       
-    private algTypeMap = {
+    public algTypeMap = {
         HS256: 'hmac',
         HS384: 'hmac',
         HS512: 'hmac',
@@ -54,8 +63,8 @@ export class JwtHeader implements IJwtHeader {
     public alg: string;
     public typ: string;
 
-    constructor(algo?: string, type?: string) {
-        algo = algo || process.env.ALGO || 'ES256';
+    constructor(algo?: Algorithms | string, type?: string) {
+        algo = algo || process.env.ALGO || 'HS256';
 
         if (!this.algCryptoMap[algo]) {
             throw new Error('Unsupported Algorithm: ' + algo);
@@ -83,6 +92,10 @@ export class JwtHeader implements IJwtHeader {
         return this.algTypeMap[this.alg];
     }
 
+    public getCryptoAlgoName(): string {
+        return this.algCryptoMap[this.alg];
+    }
+
     public toJson(): object {
         return {
             alg: this.alg,
@@ -95,7 +108,7 @@ export class JwtHeader implements IJwtHeader {
     }
 }
 
-export class JwtClaim {
+export class JwtClaims implements IJwtClaims {
 
     public userId?: string;
     public csrfToken?: string;
@@ -143,26 +156,29 @@ export class JwtClaim {
         this.iat = this.safeDate(date).getTime() / 1000;
         return this;
     }
-}
 
-class JwtProvider {
-
-    private header: IJwtHeader;
-    private claim: IJwtClaims;
-    private signature: string;
-    
-    constructor(segments?: any[]) {
-        this.header = new JwtHeader(segments[0]);
-        this.claim = new JwtClaim(segments[1]);
-        this.signature = segments[2];
+    public addClaim(key: string, value: string) {
+        this[key] = value;
     }
 
-    public base64urlencode(str: string): string {
-        return this.urlEscape(Buffer.from(str, 'utf-8').toString('base64'));
-    };
+    public toString() {
+        return JSON.stringify(this);
+    }
+}
 
-    public base64urldecode(str: string): string {
-        return this.urlUnescape(Buffer.from(str, 'base64').toString('utf-8'))
+export default class JwtProvider {
+
+    private header: IJwtHeader;
+    private claims: IJwtClaims;
+    private signature: string;
+    private jwt: string;
+    private secretKey: string;
+    
+    constructor(header?: IJwtHeader | object, claims?: IJwtClaims | object, secretKey?: string ) {
+        this.secretKey = process.env.JWT_SECRET || secretKey;
+        this.setHeader(header)
+            .setClaims(claims)
+            .setSignature();
     }
 
     private urlUnescape(str: string): string {
@@ -176,43 +192,71 @@ class JwtProvider {
             .replace(/\//g, "_");
     }
 
-    public sign(head: string, body: string, secret: string = process.env.secret, base64encodeSecret: boolean = true): string {
-        const payload = `${head}.${body}`;
-        secret = base64encodeSecret ? this.base64urlencode(secret) : secret;
+    public setHeader(header?: IJwtHeader | object): this {
+        if (!header) {
+            this.header = new JwtHeader();
+        }
+        if (typeof header === 'object') {
+            this.header = new JwtHeader((header as IJwtHead)?.alg, (header as IJwtHead)?.typ)
+        } else if ((header as any) instanceof JwtHeader) {
+            this.header = header;
+        }
+        return this;
+    }
 
-        if (this.getAlgoFn() === 'hmac') {
-            const hash = crypto.createHmac(this.algCryptoMap[this.algoKey], secret);
-            return hash.update(payload).digest('base64').toString();
+    public setClaims(claims?: IJwtClaims | object): this {
+        if (!claims) {
+            this.claims = new JwtClaims({});
+        }
+        if (typeof claims === 'object') {
+            this.claims = new JwtClaims((claims as IClaims))
+        } else if ((claims as any) instanceof JwtClaims) {
+            this.claims = claims;
+        }
+        return this;
+    }
+
+    public setSignature() {
+        const header = this.base64urlencode(this.header.toString());
+        const claims = this.base64urlencode(this.claims.toString());
+        const payload = `${header}.${claims}`;
+
+        const cryptoHashName = this.header.getCryptoAlgoName();
+
+        let hash: string;
+        
+        if (this.header.getAlgoType() === 'hmac') {
+            hash = crypto.createHmac(cryptoHashName, this.secretKey)
+                .update(payload).digest('base64').toString();
         } else {
-            const hash = crypto.createSign(this.algCryptoMap[this.algoKey]);
-            return hash.update(payload).sign(secret).toString('base64');
+            hash = crypto.createSign(cryptoHashName)
+                .update(payload).sign(this.secretKey).toString('base64');
         }
+
+        this.signature = hash;
+        this.jwt = `${header}.${claims}.${this.urlEscape(hash)}`;
+
+        return this;
     }
 
-    public jwt(payload: object, secret: string = process.env.secret, base64encodeSecret: boolean = true): string {
-        const head64 = this.base64urlencode(JSON.stringify(this.head));
-        const payload64 = this.base64urlencode(JSON.stringify(payload));
-        let jwt = `${head64}.${payload64}`;
-        jwt += `.${this.base64urlencode(this.sign(head64, payload64, secret, base64encodeSecret))}`;
+    public base64urlencode(str: string): string {
+        return this.urlEscape(Buffer.from(str, 'utf-8').toString('base64'));
+    };
 
-        return jwt;
+    public base64urldecode(str: string): string {
+        return this.urlUnescape(Buffer.from(str, 'base64').toString('utf-8'))
     }
 
-    public verify(jwtStr: string, secret: string = process.env.secret, base64encodeSecret: boolean = true): boolean {
-        try {
-            const jwtArr = jwtStr.split('.');
-            const givenSign = jwtArr[2];
-            const head = jwtArr[0];
+    public toJwtString() {
+        return this.jwt;
+    }
 
-            const sign = this.sign(jwtArr[0], jwtArr[1], secret, base64encodeSecret);
+    public static create(algorithm?: keyof JwtHeader['algCryptoMap'], payload?: IClaims | object, secretKey?: string) {
+        const jwtProvider = new JwtProvider({alg: algorithm}, payload, secretKey);
+        return jwtProvider.toJwtString();
+    }
 
-            return givenSign === sign;
+    public static verify(token: string, secretKey?: string) {
 
-        } catch (e) {
-            console.error('Token Verification Error: ', e);
-            return false;
-        }
     }
 }
-
-export default new JwtProvider();
