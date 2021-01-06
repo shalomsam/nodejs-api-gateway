@@ -1,4 +1,6 @@
 import crypto from 'crypto';
+import { emitWarning } from 'process';
+import { type } from 'os';
 
 export interface IJwtHead {
     typ: string;
@@ -30,6 +32,8 @@ export interface IJwtClaims extends IClaims {
     setExpiry(ttl: number): this;
     setNotBefore(date?: Date | string): this;
     setIssuedAt(date?: Date | string): this;
+    isNotBefore(): boolean;
+    isExpired(): boolean;
     toString(): string;
 }
 
@@ -63,15 +67,18 @@ export class JwtHeader implements IJwtHeader {
     public alg: string;
     public typ: string;
 
-    constructor(algo?: Algorithms | string, type?: string) {
-        algo = algo || process.env.ALGO || 'HS256';
-
-        if (!this.algCryptoMap[algo]) {
-            throw new Error('Unsupported Algorithm: ' + algo);
+    constructor(algo?: Algorithms | IClaims | any, type?: string) {
+        if (arguments.length === 1) {
+            this.alg = algo?.alg || algo?.algo || process.env.ALGO || 'HS256';
+            this.typ = algo?.typ || algo?.type || 'JWT';
+        } else {
+            algo = algo || process.env.ALGO || 'HS256';
+            if (!this.algCryptoMap[algo]) {
+                throw new Error('Unsupported Algorithm: ' + algo);
+            }
+            this.alg = algo;
+            this.typ = type || 'JWT';
         }
-
-        this.alg = algo;
-        this.typ = type || 'JWT';
 
         return this;
     }
@@ -152,6 +159,14 @@ export class JwtClaims implements IJwtClaims {
         return this;
     }
 
+    public isNotBefore() {
+        return new Date(this.nbf * 1000) >= new Date();
+    }
+
+    public isExpired() {
+        return new Date(this.exp * 1000) < new Date();
+    }
+
     public setIssuedAt(date?: Date | string): this {
         this.iat = this.safeDate(date).getTime() / 1000;
         return this;
@@ -174,7 +189,7 @@ export default class JwtProvider {
     private jwt: string;
     private secretKey: string;
     
-    constructor(header?: IJwtHeader | object, claims?: IJwtClaims | object, secretKey?: string ) {
+    constructor(header?: IJwtHeader | object | string, claims?: IJwtClaims | object | string, secretKey?: string ) {
         this.secretKey = process.env.JWT_SECRET || secretKey;
         this.setHeader(header)
             .setClaims(claims)
@@ -192,11 +207,16 @@ export default class JwtProvider {
             .replace(/\//g, "_");
     }
 
-    public setHeader(header?: IJwtHeader | object): this {
+    public setHeader(header?: IJwtHeader | object | string): this {
         if (!header) {
             this.header = new JwtHeader();
         }
-        if (typeof header === 'object') {
+        if (typeof header === 'string') {
+            let jwtHead = this.base64urldecode(header);
+            jwtHead = JSON.parse(jwtHead);
+            this.header = new JwtHeader(jwtHead);
+
+        } else if (typeof header === 'object') {
             this.header = new JwtHeader((header as IJwtHead)?.alg, (header as IJwtHead)?.typ)
         } else if ((header as any) instanceof JwtHeader) {
             this.header = header;
@@ -204,11 +224,15 @@ export default class JwtProvider {
         return this;
     }
 
-    public setClaims(claims?: IJwtClaims | object): this {
+    public setClaims(claims?: IJwtClaims | object | string): this {
         if (!claims) {
             this.claims = new JwtClaims({});
         }
-        if (typeof claims === 'object') {
+        if (typeof claims === 'string') {
+            let jwtClaims: any = this.base64urldecode(claims);
+            jwtClaims = JSON.parse(jwtClaims);
+            this.claims = new JwtClaims(jwtClaims);
+        } else if (typeof claims === 'object') {
             this.claims = new JwtClaims((claims as IClaims))
         } else if ((claims as any) instanceof JwtClaims) {
             this.claims = claims;
@@ -233,10 +257,14 @@ export default class JwtProvider {
                 .update(payload).sign(this.secretKey).toString('base64');
         }
 
-        this.signature = hash;
-        this.jwt = `${header}.${claims}.${this.urlEscape(hash)}`;
+        this.signature = this.base64urlencode(hash);
+        this.jwt = `${header}.${claims}.${this.signature}`;
 
         return this;
+    }
+
+    public getSignature() {
+        return this.signature;
     }
 
     public base64urlencode(str: string): string {
@@ -257,6 +285,24 @@ export default class JwtProvider {
     }
 
     public static verify(token: string, secretKey?: string) {
+        const parts = token.split('.');
 
+        if (parts.length > 3 || parts.length < 3) {
+            throw new Error('Invalid Token: ' + token);
+        }
+
+        const givenSignature = parts.pop();
+
+        const jwt = new JwtProvider(parts[0], parts[1], secretKey);
+
+        if (jwt.claims.isNotBefore()) {
+            throw new Error('Token is used before valid time: ' + token);
+        }
+
+        if (jwt.claims.isExpired()) {
+            throw new Error('Token Expired: ' + token);
+        }
+
+        return givenSignature === jwt.getSignature();
     }
 }
