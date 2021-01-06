@@ -1,6 +1,4 @@
 import crypto from 'crypto';
-import { emitWarning } from 'process';
-import { type } from 'os';
 
 export interface IJwtHead {
     typ: string;
@@ -272,14 +270,14 @@ export default class JwtProvider {
     };
 
     public base64urldecode(str: string): string {
-        return this.urlUnescape(Buffer.from(str, 'base64').toString('utf-8'))
+        return Buffer.from(this.urlUnescape(str), 'base64').toString('utf-8');
     }
 
     public toJwtString() {
         return this.jwt;
     }
 
-    public static create(algorithm?: keyof JwtHeader['algCryptoMap'], payload?: IClaims | object, secretKey?: string) {
+    public static create(algorithm?: Algorithms, payload?: IClaims | object, secretKey?: string) {
         const jwtProvider = new JwtProvider({alg: algorithm}, payload, secretKey);
         return jwtProvider.toJwtString();
     }
