@@ -23,6 +23,7 @@ export interface IClaims {
     jti?: string;
     iat?: number;
     exp?: number;
+    nbf?: number;
     [key:string]: any;
 }
 
@@ -35,7 +36,7 @@ export interface IJwtClaims extends IClaims {
     toString(): string;
 }
 
-type Algorithms = keyof JwtHeader['algCryptoMap'];
+export type Algorithms = keyof JwtHeader['algCryptoMap'];
 
 export class JwtHeader implements IJwtHeader {
     public algCryptoMap = {
@@ -70,7 +71,7 @@ export class JwtHeader implements IJwtHeader {
             this.alg = algo?.alg || algo?.algo || process.env.ALGO || 'HS256';
             this.typ = algo?.typ || algo?.type || 'JWT';
         } else {
-            algo = algo || process.env.ALGO || 'HS256';
+            algo = algo || process.env.ALGO_NAME || 'HS256';
             if (!this.algCryptoMap[algo]) {
                 throw new Error('Unsupported Algorithm: ' + algo);
             }
@@ -129,7 +130,7 @@ export class JwtClaims implements IJwtClaims {
             this[k] = claims[k];
         }
         if (!this.exp) {
-            this.setExpiry(parseInt(process.env.TOKEN_TTL) || 1000);
+            this.setExpiry(parseInt(process.env.TOKEN_TTL || '1000'));
         }
         if (!this.iat) {
             this.setIssuedAt();
@@ -188,7 +189,7 @@ export default class JwtProvider {
     private secretKey: string;
     
     constructor(header?: IJwtHeader | object | string, claims?: IJwtClaims | object | string, secretKey?: string ) {
-        this.secretKey = process.env.JWT_SECRET || secretKey;
+        this.secretKey = process.env.JWT_SECRET || secretKey || '';
         this.setHeader(header)
             .setClaims(claims)
             .setSignature();
@@ -265,6 +266,10 @@ export default class JwtProvider {
         return this.signature;
     }
 
+    public getClaims() {
+        return this.claims;
+    }
+
     public base64urlencode(str: string): string {
         return this.urlEscape(Buffer.from(str, 'utf-8').toString('base64'));
     };
@@ -282,7 +287,7 @@ export default class JwtProvider {
         return jwtProvider.toJwtString();
     }
 
-    public static verify(token: string, secretKey?: string) {
+    public static verify(token: string, secretKey?: string): Error | boolean {
         const parts = token.split('.');
 
         if (parts.length > 3 || parts.length < 3) {
@@ -302,5 +307,13 @@ export default class JwtProvider {
         }
 
         return givenSignature === jwt.getSignature();
+    }
+
+    public static getClaimsUnsafe(token: string): IClaims {
+        const parts = token.split('.');
+
+        const jwt = new JwtProvider(parts[0], parts[1]);
+
+        return jwt.getClaims();
     }
 }
