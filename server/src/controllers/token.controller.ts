@@ -12,14 +12,13 @@ const { apiKeyHandle, jwtTokenHandle, cookieDomain } = globalConfig;
  * @param {express.Request} req Express Request.
  */
 const getApiKey = (req: express.Request) => {
-    
-    if (req?.query[apiKeyHandle]) {
+    if (req?.query?.[apiKeyHandle]) {
         return req.query[apiKeyHandle];
-    } else if (req?.header[`x-${apiKeyHandle}`]) {
-        return req.header[`x-${apiKeyHandle}`];
-    } else if (req?.cookies[apiKeyHandle]) {
+    } else if (req?.headers?.[`x-${apiKeyHandle}`]) {
+        return req.headers[`x-${apiKeyHandle}`];
+    } else if (req?.cookies?.[apiKeyHandle]) {
         return req.cookies[apiKeyHandle];
-    } else if (req?.body[apiKeyHandle]) {
+    } else if (req?.body?.[apiKeyHandle]) {
         return req.body[apiKeyHandle];
     }
 
@@ -32,13 +31,13 @@ const getApiKey = (req: express.Request) => {
  * @param {express.Request} req Express Request.
  */
 const getToken = (req: express.Request) => {
-    if (req?.query[jwtTokenHandle]) {
+    if (req?.query?.[jwtTokenHandle]) {
         return req.query[jwtTokenHandle];
     } else if (req?.headers?.authorization) {
         return req.headers.authorization.split(" ")[1];
-    } else if (req?.cookies[jwtTokenHandle]) {
+    } else if (req?.cookies?.[jwtTokenHandle]) {
         return req.cookies[jwtTokenHandle];
-    } else if (req?.body[jwtTokenHandle]) {
+    } else if (req?.body?.[jwtTokenHandle]) {
         return req.body[jwtTokenHandle];
     }
 
