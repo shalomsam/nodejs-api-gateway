@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './App.css';
-import UrlList, { IUrlList } from './components/UrlList';
+import ClientList, { IClientList } from './components/ClientList';
 import 'bootstrap/dist/css/bootstrap.css';
 import Notifications, { NotificationProvider, NotificationContext } from './components/Notification';
 import Button from './components/Button';
@@ -9,7 +9,7 @@ import { GlobalConfig } from './components/typings';
 
 const App = () => {
 
-    const [list, setList] = useState<IUrlList[]>([]);
+    const [list, setList] = useState<IClientList[]>([]);
     const [globalConfig, setGlobalConfig] = useState<GlobalConfig | undefined>(undefined);
     const [showAddUrlModal, setShowAddUrlModal] = useState(false);
 
@@ -43,19 +43,19 @@ const App = () => {
     return (
         <NotificationProvider>
             <div className="App">
-                <h1>Url List:</h1>
+                <h1>Clients:</h1>
                 <div className='actionWrp'>
                     <Button onClick={() => setShowAddUrlModal(true)}>Add Short Url</Button>
                     {/*  */}
                     <AddUrlModal
                         showAddUrlModal={showAddUrlModal}
                         setShowAddUrlModal={setShowAddUrlModal}
-                        onSuccess={(update: IUrlList) => {
+                        onSuccess={(update: IClientList) => {
                             setList([...list, update])
                         }}
                     />
                 </div>
-                <UrlList config={globalConfig} list={list} />
+                <ClientList config={globalConfig} list={list} />
             </div>
             <NotificationContext.Consumer>
                 {({ notifications, setTtl }) => {

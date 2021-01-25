@@ -3,56 +3,19 @@ import jwt from "../utils/jwt/jwt";
 import { globalConfig } from "../config";
 import ClientModel from "../models/Client";
 import { ApiResponse } from "../utils/http";
+import { getApiKey, getToken } from "utils/helpers";
 
 const { apiKeyHandle, jwtTokenHandle, cookieDomain } = globalConfig;
-
-/**
- * Method to get Public API Key from request.
- * 
- * @param {express.Request} req Express Request.
- */
-const getApiKey = (req: express.Request) => {
-    if (req?.query?.[apiKeyHandle]) {
-        return req.query[apiKeyHandle];
-    } else if (req?.headers?.[`x-${apiKeyHandle}`]) {
-        return req.headers[`x-${apiKeyHandle}`];
-    } else if (req?.cookies?.[apiKeyHandle]) {
-        return req.cookies[apiKeyHandle];
-    } else if (req?.body?.[apiKeyHandle]) {
-        return req.body[apiKeyHandle];
-    }
-
-    return null;
-}
-
-/**
- * Method to get JWT Token from Request.
- * 
- * @param {express.Request} req Express Request.
- */
-const getToken = (req: express.Request) => {
-    if (req?.query?.[jwtTokenHandle]) {
-        return req.query[jwtTokenHandle];
-    } else if (req?.headers?.authorization) {
-        return req.headers.authorization.split(" ")[1];
-    } else if (req?.cookies?.[jwtTokenHandle]) {
-        return req.cookies[jwtTokenHandle];
-    } else if (req?.body?.[jwtTokenHandle]) {
-        return req.body[jwtTokenHandle];
-    }
-
-    return null;
-}
 
 /**
  * Controller Method to generate JWT Token
  * 
  * @route POST /api/token
- * @group Token - Token Controller
+ * @group Token
  * @param {express.Request} req Express Request
  * @param {express.Response} res Express Response
  * @returns {object} 200 - Returns a success object and JWT as Cookie.
- * @returns {object} 400 - Returns a UnAuthorized response statusCode on Error.
+ * @returns {object} 400 - Returns a Bad Request response statusCode on Error.
  */
 export const genToken = async (req: express.Request, res: express.Response): Promise<express.Response> => {
     const payload = req.body;
@@ -94,11 +57,12 @@ export const genToken = async (req: express.Request, res: express.Response): Pro
  * Controller Method to generate JWT Token
  * 
  * @route POST /token/validate
- * @group Token - Token Controller
+ * @group Token
  * @param {express.Request} req Express Request
  * @param {express.Response} res Express Response
  * @returns {object} 200 - Returns a success object.
- * @returns {object} 400 - Returns a UnAuthorized response statusCode on Error.
+ * @returns {object} 400 - Returns a Bad Request response statusCode on Error or Invalid Public Api Key.
+ * @returns {object} 401 - Returns a UnAuthorized response statusCode on Invalid Signature.
  */
 export const verifyToken = async (req: express.Request, res: express.Response): Promise<express.Response> => {
     const token = getToken(req);

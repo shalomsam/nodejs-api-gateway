@@ -1,5 +1,24 @@
 import crypto from 'crypto';
 
+export const urlUnescape =(str: string): string => {
+    str += new Array(5 - str.length % 4).join('=');
+    return str.replace(/\-/g, '+').replace(/_/g, '/');
+}
+
+export const urlEscape =(str: string): string => {
+    return str.replace(/=/g, "")
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_");
+}
+
+export const base64urlencode = (str: string): string => {
+    return urlEscape(Buffer.from(str, 'utf-8').toString('base64'));
+};
+
+export const base64urldecode = (str: string): string => {
+    return Buffer.from(urlUnescape(str), 'base64').toString('utf-8');
+}
+
 export interface IJwtHead {
     typ: string;
     alg: string;
@@ -211,7 +230,7 @@ export default class JwtProvider {
             this.header = new JwtHeader();
         }
         if (typeof header === 'string') {
-            let jwtHead = this.base64urldecode(header);
+            let jwtHead = base64urldecode(header);
             jwtHead = JSON.parse(jwtHead);
             this.header = new JwtHeader(jwtHead);
 
@@ -228,7 +247,7 @@ export default class JwtProvider {
             this.claims = new JwtClaims({});
         }
         if (typeof claims === 'string') {
-            let jwtClaims: any = this.base64urldecode(claims);
+            let jwtClaims: any = base64urldecode(claims);
             jwtClaims = JSON.parse(jwtClaims);
             this.claims = new JwtClaims(jwtClaims);
         } else if (typeof claims === 'object') {
@@ -240,8 +259,8 @@ export default class JwtProvider {
     }
 
     public setSignature() {
-        const header = this.base64urlencode(this.header.toString());
-        const claims = this.base64urlencode(this.claims.toString());
+        const header = base64urlencode(this.header.toString());
+        const claims = base64urlencode(this.claims.toString());
         const payload = `${header}.${claims}`;
 
         const cryptoHashName = this.header.getCryptoAlgoName();
@@ -256,7 +275,7 @@ export default class JwtProvider {
                 .update(payload).sign(this.secretKey).toString('base64');
         }
 
-        this.signature = this.base64urlencode(hash);
+        this.signature = base64urlencode(hash);
         this.jwt = `${header}.${claims}.${this.signature}`;
 
         return this;

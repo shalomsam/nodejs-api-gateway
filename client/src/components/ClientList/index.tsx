@@ -4,7 +4,7 @@ import Editable from '../Editable';
 import { NotificationContext, NotificationTypes } from '../Notification';
 import { GlobalConfig } from '../typings';
 
-export interface IUrlList {
+export interface IClientList {
     _id: string;
     httpCode: number;
     shortPath: string;
@@ -16,15 +16,15 @@ export interface IUrlList {
 }
 
 interface Props {
-    list: IUrlList[];
+    list: IClientList[];
     config?: GlobalConfig;
 }
 
-const UrlList: FC<Props>  = ({ list = [], config }: Props) => {
+const ClientList: FC<Props>  = ({ list = [], config }: Props) => {
 
     const { addNotification } = useContext(NotificationContext);
 
-    const update = async (id: string, data: Partial<IUrlList>) => {
+    const update = async (id: string, data: Partial<IClientList>) => {
         if (data && id) {
             try {
                 const result = await fetch(`/api/shorturl/${id}`, {
@@ -56,7 +56,7 @@ const UrlList: FC<Props>  = ({ list = [], config }: Props) => {
 
     const content = list
         .sort((a, b) => (a.createdOn < b.createdOn) ? -1 : ((a.createdOn > b.createdOn) ? 1 : 0))
-        .map((item: IUrlList, index: number) => {
+        .map((item: IClientList, index: number) => {
 
             let createdOn: any = new Date(item.createdOn);
             createdOn = createdOn.toDateString();
@@ -123,4 +123,4 @@ const UrlList: FC<Props>  = ({ list = [], config }: Props) => {
     );
 }
 
-export default UrlList;
+export default ClientList;

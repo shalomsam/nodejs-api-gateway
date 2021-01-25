@@ -27,6 +27,6 @@ export const ClientSchema: Schema = new Schema({
     updatedOn: { type: Date, required: false },
 });
 
-const ClientModel = mongoose.model<Client>('RegisteredApp', ClientSchema);
+const ClientModel = mongoose.model<Client>('Clients', ClientSchema);
 
 export default ClientModel;
