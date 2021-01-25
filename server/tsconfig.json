@@ -1,17 +1,26 @@
 {
-    "compilerOptions": {
-       "module": "commonjs",
-       "moduleResolution": "node",
-       "pretty": true,
-       "target": "es6",
-       "outDir": "./dist",
-       "baseUrl": "./src",
-       "esModuleInterop": true,
-    },
-    "include": [
-       "src/**/*.ts"
-    ],
-    "exclude": [
-       "node_modules",
-    ]
- }
+   "compilerOptions": {
+      "module": "commonjs",
+      "moduleResolution": "node",
+      "pretty": true,
+      "target": "es6",
+      "outDir": "dist",
+      "baseUrl": ".",
+      "esModuleInterop": true,
+      "paths": {
+         "config/*": ["config/*"],
+         "controllers/*": ["controllers/*"],
+         "middleware/*": ["middleware/*"],
+         "models/*": ["models/*"],
+         "routes/*": ["routes/*"],
+         "utils/*": ["utils/*"],
+         "views/*": ["views/*"]
+      }
+   },
+   "include": [
+      "src/**/*.ts"
+   ],
+   "exclude": [
+      "node_modules",
+   ]
+}

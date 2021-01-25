@@ -3,7 +3,7 @@ import jwt from "../utils/jwt/jwt";
 import { globalConfig } from "../config";
 import ClientModel from "../models/Client";
 import { ApiResponse } from "../utils/http";
-import { getApiKey, getToken } from "utils/helpers";
+import { getApiKey, getToken } from "../utils/helpers";
 
 const { apiKeyHandle, jwtTokenHandle, cookieDomain } = globalConfig;
 

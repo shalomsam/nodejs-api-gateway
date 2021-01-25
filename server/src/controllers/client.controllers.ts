@@ -2,7 +2,7 @@ import express from "express";
 import { globalConfig } from "../config";
 import { ApiResponse } from "../utils/http";
 import ClientModel, { Client } from "../models/Client";
-import Roles from "models/Roles";
+import Roles from "../models/Roles";
 
 const { clientUserKey } = globalConfig;
 
