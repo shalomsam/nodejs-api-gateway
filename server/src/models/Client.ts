@@ -18,7 +18,7 @@ export const ClientSchema: Schema = new Schema({
     name: { type: String, required: true, unique: true },
     algoName: { type: String, required: true, default: 'HS256' },
     secret: { type: String, required: true, unique: true },
-    apiPublicKey: { type: String, required: true, unique: true },
+    apiPublicKey: { type: String, required: true, unique: true, immutable: true },
     redirectUrl: { type: String, required: false },
     dailyLimit: { type: Number, required: false, default: 0 },
     monthlyLimit: { type: Number, required: false, default: 0 },

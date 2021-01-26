@@ -17,6 +17,7 @@ export const globalConfig = {
     apiKeyHandle: "tmAK",
     jwtTokenHandle: "tmJWT",
     cookieDomain: process.env.COOKIE_DOMAIN,
-    clientUserKey: 'clientUserId',
     clientKeys,
+    clientApiKey,
+    cryptoSaltRounds: process.env.CRYPTO_SALT_ROUNDS || "10",
 };
