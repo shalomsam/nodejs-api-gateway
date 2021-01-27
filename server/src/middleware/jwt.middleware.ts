@@ -3,7 +3,7 @@ import { getToken } from "../utils/helpers";
 import jwt, { IClaims } from "../utils/jwt/jwt";
 import { ApiResponse } from "../utils/http";
 import { globalConfig } from "../config";
-import UserModel, { User } from '../models/User';
+import UserModel, { User, UserDoc } from '../models/User';
 
 const { clientKeys } = globalConfig;
 
@@ -16,14 +16,14 @@ export interface JwtPayload extends IClaims {
 export interface JwtLocals {
     token: string;
     jwtPayload: JwtPayload;
-    user: Partial<User>;
+    user: Partial<UserDoc>;
 }
 
 const jwtMiddleware = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     const token = getToken(req);
     const payload = jwt.getClaimsUnsafe(token);
     let userId = payload?.userId;
-    let user: User;
+    let user: UserDoc;
 
     // short UUID key
     const { clientApiKey } = payload;
@@ -40,7 +40,7 @@ const jwtMiddleware = async (req: express.Request, res: express.Response, next: 
     res.locals as JwtLocals;
     res.locals.token = token;
     res.locals.jwtPayload = payload;
-    res.locals.user = user?.toObject();
+    res.locals.user = user;
 
     next();
 }

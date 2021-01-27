@@ -44,7 +44,7 @@ UserSchema.pre<UserDoc>('save', (next) => {
     const user = this as UserDoc;
     if (!user?.isModified('password')) return next();
 
-    const salt = bcrypt.genSaltSync(parseInt(cryptoSaltRounds));
+    const salt = bcrypt.genSaltSync(cryptoSaltRounds);
     user.password = bcrypt.hashSync(user.password, salt);
 });
 
