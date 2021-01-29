@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import app from "./app";
 import logger from './utils/logger';
 import { globalConfig } from './config';
+import setup from './utils/setup';
 
 const {
     port,
@@ -23,6 +24,10 @@ logger.log('Mongo Connection String > ', mongoUrl);
 app.set("domain", DOMAIN);
 app.set("port", PORT);
 app.set("baseUrl", BASE_URL);
+
+setup();
+
+console.log('globalConfig >> ', globalConfig)
 
 /**
  * Error Handler. Provides full stack - remove for production

@@ -2,7 +2,7 @@ import mongoose, { Schema, Document } from "mongoose";
 import bcrypt from "bcrypt";
 import Roles from "./Roles";
 import { globalConfig } from "../config";
-import { voidFn } from "types";
+import { voidFn } from "..";
 
 const {
     cryptoSaltRounds

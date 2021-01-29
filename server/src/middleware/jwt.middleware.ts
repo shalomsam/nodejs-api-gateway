@@ -21,6 +21,11 @@ export interface JwtLocals {
 
 const jwtMiddleware = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     const token = getToken(req);
+
+    if (!token) {
+        return res.status(ApiResponse.UNAUTH.statusCode).json(ApiResponse.UNAUTH);
+    }
+
     const payload = jwt.getClaimsUnsafe(token);
     let userId = payload?.userId;
     let user: UserDoc;
@@ -32,6 +37,10 @@ const jwtMiddleware = async (req: express.Request, res: express.Response, next: 
     if (userId) {
         user = await UserModel.findOne({ _id: userId });
     }
+
+    console.log("payload >> ", payload);
+    console.log("clientApiKey >> ", clientApiKey);
+    console.log("clientSecret >> ", clientSecret);
 
     if (!clientApiKey && !clientSecret && jwt.verify(token, clientSecret)) {
         return res.status(ApiResponse.UNAUTH.statusCode).json(ApiResponse.UNAUTH);

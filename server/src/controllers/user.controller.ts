@@ -146,7 +146,7 @@ export const resetPassword = async (req: express.Request, res: express.Response)
 
     if (isValid) {
         const token = crypto.randomBytes(50).toString('hex');
-        const tokenExp = (new Date()).getTime() + parseInt(jwtTtl);
+        const tokenExp = (new Date()).getTime() + jwtTtl;
 
         userFromEmail.resetToken = token;
         userFromEmail.resetTokenExpires = tokenExp;

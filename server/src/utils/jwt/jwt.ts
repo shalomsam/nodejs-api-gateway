@@ -149,7 +149,8 @@ export class JwtClaims implements IJwtClaims {
             this[k] = claims[k];
         }
         if (!this.exp) {
-            this.setExpiry(parseInt(process.env.TOKEN_TTL || '1000'));
+            const exp = parseInt(process.env.JWL_TTL) || 10 * 60 * 1000
+            this.setExpiry(exp);
         }
         if (!this.iat) {
             this.setIssuedAt();

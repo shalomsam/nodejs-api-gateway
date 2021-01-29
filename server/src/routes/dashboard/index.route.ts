@@ -2,6 +2,6 @@ import { showDashboard } from '../../controllers/dash.controller';
 import { Router } from 'express';
 
 const router = Router();
-router.get('/home', showDashboard);
+router.get('/:path?', showDashboard);
 
 export default router;

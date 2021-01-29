@@ -40,3 +40,7 @@ export const getToken = (req: express.Request) => {
 
     return null;
 }
+
+export const isSSR: boolean = ((): boolean => {
+    return typeof window === 'undefined';
+})();

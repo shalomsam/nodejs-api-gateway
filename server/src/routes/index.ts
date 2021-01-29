@@ -6,6 +6,6 @@ const router = Router();
 const version = 'v1'
 
 router.use(`/api/${version}`, apiRoutes);
-router.use('/dashboard', dashRoutes)
+router.use('/', dashRoutes)
 
 export default router;
