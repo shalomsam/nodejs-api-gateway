@@ -1,3 +1,4 @@
-mongo-volume
 node_modules
-package-lock.json
+dist
+.env.*
+.env

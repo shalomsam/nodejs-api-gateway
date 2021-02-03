@@ -1,0 +1,25 @@
+.modalWrp {
+    position: relative;
+}
+
+.modalWrp .backdrop {
+    background-color: rgba(0,0,0,0.4);
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.modal {
+    display: block;
+    opacity: 0;
+}
+
+.modal.show {
+    opacity: 1;
+}
+
+.modal-dialog {
+    z-index: 1070;
+}
