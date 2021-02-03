@@ -16,6 +16,7 @@ import { JwtLocals } from "../middleware/jwt.middleware";
  */
 export const getClient = async (req: express.Request, res: express.Response): Promise<express.Response> => {
     const user = (res.locals as JwtLocals).user;
+    console.log('payload >> ', (res.locals as JwtLocals).jwtPayload);
     if (!user) {
         return res.status(ApiResponse.UNAUTH.statusCode).json(ApiResponse.UNAUTH);
     }

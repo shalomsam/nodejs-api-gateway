@@ -3,15 +3,17 @@ import { Link, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { userActions } from '../actions';
+import { RootState } from '../helpers';
+import { AuthStatus } from '../reducers/auth.reducer';
 
 function LoginPage() {
     const [inputs, setInputs] = useState({
-        username: '',
+        email: '',
         password: ''
     });
     const [submitted, setSubmitted] = useState(false);
-    const { username, password } = inputs;
-    const loggingIn = useSelector((state: any) => state.authentication.loggingIn);
+    const { email, password } = inputs;
+    const authStatus = useSelector((state: RootState) => state.authentication.status);
     const dispatch = useDispatch();
     const location = useLocation();
 
@@ -29,10 +31,10 @@ function LoginPage() {
         e.preventDefault();
 
         setSubmitted(true);
-        if (username && password) {
+        if (email && password) {
             // get return url from location state or default to home page
             const { from } = location.state as any || { from: { pathname: "/" } };
-            dispatch(userActions.login(username, password, from));
+            dispatch(userActions.login(email, password, from));
         }
     }
 
@@ -41,10 +43,10 @@ function LoginPage() {
             <h2>Login</h2>
             <form name="form" onSubmit={handleSubmit}>
                 <div className="form-group">
-                    <label>Username</label>
-                    <input type="text" name="username" value={username} onChange={handleChange} className={'form-control' + (submitted && !username ? ' is-invalid' : '')} />
-                    {submitted && !username &&
-                        <div className="invalid-feedback">Username is required</div>
+                    <label>Email</label>
+                    <input type="text" name="email" value={email} onChange={handleChange} className={'form-control' + (submitted && !email ? ' is-invalid' : '')} />
+                    {submitted && !email &&
+                        <div className="invalid-feedback">Email is required</div>
                     }
                 </div>
                 <div className="form-group">
@@ -56,7 +58,7 @@ function LoginPage() {
                 </div>
                 <div className="form-group">
                     <button className="btn btn-primary">
-                        {loggingIn && <span className="spinner-border spinner-border-sm mr-1"></span>}
+                        {authStatus === AuthStatus.loggingIn && <span className="spinner-border spinner-border-sm mr-1"></span>}
                         Login
                     </button>
                     <Link to="/register" className="btn btn-link">Register</Link>

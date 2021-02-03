@@ -3,9 +3,8 @@ import express from 'express';
 import { renderToString } from "react-dom/server";
 import { globalConfig } from "../config";
 import jwt from '../utils/jwt/jwt';
-import WrappedApp from '../client/App/WrappedApp'
 import { ApiResponse } from '../utils/http';
-import { StaticRouter } from 'react-router';
+import { StaticRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { getStore } from '../client/helpers';
 import { App } from '../client/App';
@@ -26,7 +25,8 @@ const { clientKeys, clientApiKey, algoName, jwtTokenHandle } = globalConfig;
  * @returns {object} 401 - Returns a UnAuthorized response statusCode on Error.
  */
 export const showDashboard = async (req: express.Request, res: express.Response): Promise<express.Response> => {
-    const token = jwt.create(algoName as any, { clientApiKey }, clientKeys[clientApiKey]);
+    const tokenExists = req.cookies[jwtTokenHandle];
+    
     const context = {};
     const store = getStore();
     const initialState = JSON.stringify(store.getState());
@@ -41,7 +41,13 @@ export const showDashboard = async (req: express.Request, res: express.Response)
 
     const html = IndexFile({ app: reactApp, initialState });
 
-    return res.status(ApiResponse.OK.statusCode)
-        .cookie(jwtTokenHandle, token)
-        .send(html);
+    // NOTE: Fresh JWT Token is set on every request (to Server).
+    let _res = res.status(ApiResponse.OK.statusCode)
+
+    if (!tokenExists) {
+        const token = jwt.create(algoName as any, { clientApiKey }, clientKeys[clientApiKey]);
+        _res = _res.cookie(jwtTokenHandle, token);
+    }
+        
+    return _res.send(html);
 }

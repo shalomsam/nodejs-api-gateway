@@ -1,6 +1,11 @@
+import { AnyAction } from 'redux';
 import { userConstants } from '../constants';
 
-export function registration(state = {}, action: any) {
+export interface RegistrationState {
+    registering?: boolean
+}
+
+export function registration(state: RegistrationState = {}, action: AnyAction): RegistrationState {
     switch (action.type) {
         case userConstants.REGISTER_REQUEST:
             return { registering: true };

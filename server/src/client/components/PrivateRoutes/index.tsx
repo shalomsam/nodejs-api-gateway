@@ -1,6 +1,6 @@
 import React from 'react';
 import { Route, Redirect } from 'react-router-dom';
-import { isSSR } from '../../../utils/helpers';
+import { isSSR } from '../../../client/helpers';
 
 function PrivateRoute({ component: Component, roles, ...rest }: any) {
     return (

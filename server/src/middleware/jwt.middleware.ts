@@ -30,6 +30,8 @@ const jwtMiddleware = async (req: express.Request, res: express.Response, next: 
     let userId = payload?.userId;
     let user: UserDoc;
 
+    console.log('original pyload >', payload);
+
     // short UUID key
     const { clientApiKey } = payload;
     const clientSecret = clientKeys?.[clientApiKey];
@@ -37,10 +39,6 @@ const jwtMiddleware = async (req: express.Request, res: express.Response, next: 
     if (userId) {
         user = await UserModel.findOne({ _id: userId });
     }
-
-    console.log("payload >> ", payload);
-    console.log("clientApiKey >> ", clientApiKey);
-    console.log("clientSecret >> ", clientSecret);
 
     if (!clientApiKey && !clientSecret && jwt.verify(token, clientSecret)) {
         return res.status(ApiResponse.UNAUTH.statusCode).json(ApiResponse.UNAUTH);

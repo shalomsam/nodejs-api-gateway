@@ -2,10 +2,11 @@ import express from "express";
 import { globalConfig } from "../config";
 import { ApiResponse } from "../utils/http";
 import jwt from '../utils/jwt/jwt';
-import UserModel, { User } from "../models/User";
+import UserModel, { User, UserDoc } from "../models/User";
 import { JwtLocals } from "../middleware/jwt.middleware";
 import Roles from "../models/Roles";
 import crypto from "crypto";
+import short from "short-uuid";
 
 const {
     algoName,
@@ -29,21 +30,35 @@ const {
 export const authenticate = async (req: express.Request, res: express.Response): Promise<express.Response> => {
     const { password, email } = req.body as Pick<User, "email" | "password">;
     const { jwtPayload } = (res.locals as JwtLocals);
-    const user = await UserModel.findOne({ email });
+    const user: UserDoc = await UserModel.findOne({ email });
 
-    const isValid = user.comparePassword(password) && jwtPayload.clientApiKey === clientApiKey;
+    let isValid = user.comparePassword(password);
+    isValid = isValid && jwtPayload.clientApiKey === clientApiKey;
 
     if (isValid) {
-        const token = jwt.create(algoName as any, { email: user.email, clientApiKey }, clientKeys[clientApiKey]);
+        const { password, ..._user } = user.toJSON();
+        const jwtPayload = { userId: user._id, clientApiKey };
+        const token = jwt.create(algoName as any, jwtPayload, clientKeys[clientApiKey]);
+
         return res.status(ApiResponse.OK.statusCode)
             .cookie(jwtTokenHandle, token)
             .json({
                 ...ApiResponse.OK,
                 accessToken: token,
+                user: _user
             });
     }
+
+    let responseJson = ApiResponse.UNAUTH;
+
+    if (!user) {
+        responseJson = {
+            ...responseJson,
+            message: "User does not exist"
+        }
+    }
     
-    return res.status(ApiResponse.UNAUTH.statusCode).json(ApiResponse.UNAUTH);
+    return res.status(ApiResponse.UNAUTH.statusCode).json(responseJson);
 }
 
 /**
@@ -59,11 +74,35 @@ export const authenticate = async (req: express.Request, res: express.Response):
  * @returns {object} 401 - Returns a UnAuthorized response statusCode on Error.
  */
 export const addNewUser = async (req: express.Request, res: express.Response): Promise<express.Response> => {
-    const newUser = req.body as Pick<User, "email" | "firstName" | "password" | "lastName">;
+    const newUser = req.body as Pick<User, "email" | "firstName" | "password" | "lastName" | "role">;
     const { user, jwtPayload } = (res.locals as JwtLocals);
+    newUser.role = newUser?.role || Roles.User;
 
-    // Requesting user must be an Admin & must have a valid clientApi
-    const isValid = user?.role === Roles.Admin && jwtPayload.clientApiKey === clientApiKey && newUser.email;
+    const newUserObj = await UserModel.findOne({ email: newUser.email });
+    const adminUsers = await UserModel.findOne({ role: Roles.Admin });
+
+    
+    let isValid = true;
+    let errMessage = ApiResponse.UNAUTH.message;
+
+    // Requesting user must be an Admin
+    if (user?.role === Roles.Admin) 
+        isValid = false;
+        errMessage = "New users additions can only be requested from an Admin.";
+        
+    if (jwtPayload.clientApiKey === clientApiKey) // must have a valid clientApi
+        isValid = false;
+        errMessage = "Invalid or missing client API Key.";
+        
+    if (!newUserObj)    // New User must not already exist
+        isValid = false;
+        errMessage = "User already exists.";
+
+    // If no admin user exists. Assume first user registration.
+    if (!adminUsers) {
+        newUser.role = Roles.Admin;
+        isValid = jwtPayload.clientApiKey === clientApiKey;
+    }
 
     if (isValid) {
         let _newUser = new UserModel(newUser);
@@ -76,7 +115,10 @@ export const addNewUser = async (req: express.Request, res: express.Response): P
         });
     }
 
-    return res.status(ApiResponse.UNAUTH.statusCode).json(ApiResponse.UNAUTH);
+    return res.status(ApiResponse.UNAUTH.statusCode).json({
+        ...ApiResponse.UNAUTH,
+        message: errMessage,
+    });
 }
 
 /**

@@ -27,8 +27,6 @@ app.set("baseUrl", BASE_URL);
 
 setup();
 
-console.log('globalConfig >> ', globalConfig)
-
 /**
  * Error Handler. Provides full stack - remove for production
  */

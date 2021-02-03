@@ -2,14 +2,12 @@ import React from 'react';
 // import './index.css';
 import reportWebVitals from './reportWebVitals';
 
-import { hydrate, render } from 'react-dom';
-import { isSSR } from '../utils/helpers';
+import { hydrate } from 'react-dom';
 import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { getStore } from './helpers';
 import { App } from './App';
 
-// const renderMethod = module?.hot && !isSSR ? render : hydrate;
 const store = getStore();
 
 hydrate(

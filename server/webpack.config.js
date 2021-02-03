@@ -3,6 +3,7 @@
 const nodeExternals = require('webpack-node-externals');
 const dotenv = require('dotenv');
 const webpack = require('webpack');
+const path = require('path');
 
 
 // /** @type WebpackConfig[] */
@@ -10,7 +11,7 @@ const configs = (env, options) => {
     const appEnv = env || options.mode;
     const envfile = `.env.${appEnv}`;
     const _dotenv = dotenv.config({
-        path: envfile
+        path: envfile,
     });
 
     return [
@@ -36,6 +37,7 @@ const configs = (env, options) => {
                     {
                         test: /\.tsx?$/,
                         loader: 'ts-loader',
+                        exclude: path.resolve(__dirname, './src/config') // excluded to minimize risk of exposure
                     },
                 ],
             },
@@ -53,9 +55,10 @@ const configs = (env, options) => {
                 extensions: ['.ts', '.tsx', '.js', '.jsx', '.hbs'],
             },
             plugins: [
-                new webpack.DefinePlugin({
-                    "process.env": _dotenv.parsed
-                }),
+                // new webpack.DefinePlugin({
+                //     "process.env": JSON.parse(JSON.stringify(_dotenv.parsed)),
+                // }),
+                new webpack.EnvironmentPlugin(Object.keys(_dotenv.parsed || {})),
             ],
             // Source maps support ('inline-source-map' also works)
             devtool: 'source-map',

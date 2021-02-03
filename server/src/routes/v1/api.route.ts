@@ -5,6 +5,7 @@ import { genToken, verifyToken } from '../../controllers/api.controller';
 import { addClient, getClient } from '../../controllers/client.controllers';
 import { addNewUser, authenticate, resetPassword, updateUser } from '../../controllers/user.controller';
 import { globalConfig } from '../../config';
+import Roles from '../../models/Roles';
 
 const {
     passwordMaxLength,
@@ -32,6 +33,9 @@ const UserSchema: Schema = {
             options: { min: passwordMinLength, max: passwordMaxLength }
         },
         notEmpty: true,
+    },
+    role: {
+        optional: true,
     }
 }
 

@@ -215,17 +215,6 @@ export default class JwtProvider {
             .setSignature();
     }
 
-    private urlUnescape(str: string): string {
-        str += new Array(5 - str.length % 4).join('=');
-        return str.replace(/\-/g, '+').replace(/_/g, '/');
-    }
-
-    private urlEscape(str: string): string {
-        return str.replace(/=/g, "")
-            .replace(/\+/g, "-")
-            .replace(/\//g, "_");
-    }
-
     public setHeader(header?: IJwtHeader | object | string): this {
         if (!header) {
             this.header = new JwtHeader();
@@ -290,14 +279,6 @@ export default class JwtProvider {
         return this.claims;
     }
 
-    public base64urlencode(str: string): string {
-        return this.urlEscape(Buffer.from(str, 'utf-8').toString('base64'));
-    };
-
-    public base64urldecode(str: string): string {
-        return Buffer.from(this.urlUnescape(str), 'base64').toString('utf-8');
-    }
-
     public toJwtString() {
         return this.jwt;
     }
@@ -329,11 +310,14 @@ export default class JwtProvider {
         return givenSignature === jwt.getSignature();
     }
 
-    public static getClaimsUnsafe(token: string): IClaims {
+    public static getClaimsUnsafe(token: string): Partial<IClaims> {
+        const parts = token.split('.');
+        return JSON.parse(base64urldecode(parts[1]));
+    }
+
+    public static getJwtHeaderUnsafe(token: string): Partial<IJwtHead> {
         const parts = token.split('.');
 
-        const jwt = new JwtProvider(parts[0], parts[1]);
-
-        return jwt.getClaims();
+        return JSON.parse(base64urldecode(parts[0]));
     }
 }

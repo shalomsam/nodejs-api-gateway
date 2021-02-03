@@ -1,7 +1,10 @@
 import short from 'short-uuid';
 import crypto from 'crypto';
 import fs from 'fs';
-import { globalConfig, config } from '../../config';
+import path from 'path';
+import { globalConfig } from '../../config';
+import UserModel from '../../models/User';
+import Roles from '../../models/Roles';
 let { clientApiKey, clientKeys, appEnv } = globalConfig;
 
 export default function setup() {
@@ -14,19 +17,20 @@ export default function setup() {
             [clientApiKey]: apiSecret
         }
 
-        // config.update({ clientKeys, clientApiKey });
-        // console.log('config >> ', config)
-
-        const envFile = `.env.${appEnv}`;
+        const envFile = path.relative(__dirname, `/.env.${appEnv}`);
         const exists = fs.existsSync(envFile);
 
-        if (exists) {
+        if (!exists) {
+            console.log(`writing ${envFile}....`);
             fs.writeFileSync(
                 envFile,
-                `
-                CLIENT_API_KEY=${clientApiKey}
-                CLIENT_PRIV_KEY=${apiSecret}
-                `
+                `CLIENT_API_KEY="${clientApiKey}" \nCLIENT_PRIV_KEY="${apiSecret}"`
+            );
+        } else {
+            console.log(`Appending ${envFile}....`);
+            fs.appendFileSync(
+                envFile,
+                `CLIENT_API_KEY="${clientApiKey}" \nCLIENT_PRIV_KEY="${apiSecret}"`
             )
         }
     }

@@ -9,6 +9,7 @@ const {
 } = globalConfig;
 
 export interface User {
+    _id?: any;
     email: string;
     password: string;
     firstName: string;
@@ -21,8 +22,8 @@ export interface User {
 }
 
 export interface UserDoc extends User, Document {
-    createdOn: Date,
-    updatedOn: Date,
+    createdAt: Date,
+    updatedAt: Date,
     comparePassword: (givenPass: string, cb?: voidFn) => void | boolean;
 }
 
@@ -35,21 +36,25 @@ export const UserSchema = new Schema({
     resetTokenExpires: { type: Date, required: false },
     providerId: { type: String, required: false },
     provider: { type: String, required: false },
-    role: { type: String, required: true },
-    createdOn: { type: Date, required: true },
-    updatedOn: { type: Date, required: false },
+    role: { type: String, required: true }
+}, {
+    timestamps: true
 });
 
-UserSchema.pre<UserDoc>('save', (next) => {
+UserSchema.pre<UserDoc>('save', function (this, next) {
     const user = this as UserDoc;
-    if (!user?.isModified('password')) return next();
 
-    const salt = bcrypt.genSaltSync(cryptoSaltRounds);
-    user.password = bcrypt.hashSync(user.password, salt);
+    if (user?.isModified('password')) {
+        const salt = bcrypt.genSaltSync(cryptoSaltRounds);
+        user.password = bcrypt.hashSync(user.password, salt);
+    }
+
+    return next();
 });
 
-UserSchema.methods.comparePassword = (givenPass: string, cb?: voidFn) => {
+UserSchema.methods.comparePassword = function(givenPass: string, cb?: voidFn) {
     const user = this as UserDoc;
+
     const isValid = bcrypt.compareSync(givenPass, user.password);
     if (cb) cb(isValid);
     return isValid;

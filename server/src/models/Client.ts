@@ -2,6 +2,7 @@ import mongoose, { Schema, Document } from "mongoose";
 import { Algorithms } from "../utils/jwt/jwt";
 
 export interface Client extends Document {
+    _id?: any;
     name: string;
     algoName: Algorithms;
     secret: string;
@@ -10,8 +11,8 @@ export interface Client extends Document {
     dailyLimit: Number;
     monthlyLimit: Number;
     yearlyLimit: Number;
-    createdOn: Date;
-    updatedOn: Date;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export const ClientSchema: Schema = new Schema({
@@ -23,8 +24,8 @@ export const ClientSchema: Schema = new Schema({
     dailyLimit: { type: Number, required: false, default: 0 },
     monthlyLimit: { type: Number, required: false, default: 0 },
     yearlyLimit: { type: Number, required: false, default: 0 },
-    createdOn: { type: Date, required: true },
-    updatedOn: { type: Date, required: false },
+}, {
+    timestamps: true
 });
 
 const ClientModel = mongoose.model<Client>('Clients', ClientSchema);
