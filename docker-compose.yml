@@ -1,25 +1,17 @@
 version: "3.1"
 services:
-    client:
-        container_name: react_client
-        build: ./client
-        ports:
-            - "3000:3000"
-        volumes:
-            - ./client/src:/usr/src/client/src
-            - ./client/public:/usr/src/client/public
-        links:
-            - api
-        networks:
-            - webappnetwork
-    api:
-        container_name: node_api
-        build: ./server
+    ssrapp:
+        container_name: ssrapp
+        build: .
+        env_file: .env.development
         ports:
             - "3001:3001"
         volumes:
-            - ./server/src:/usr/src/server/src
-            - ./server/dist:/usr/src/server/dist
+            - .:/usr/app
+            - ./src:/usr/app/src
+            - ./public:/usr/app/public
+            - ./dist:/usr/app/dist
+            - /usr/app/node_modules/bcrypt/
         links:
             - mongo
         networks:

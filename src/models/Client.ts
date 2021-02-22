@@ -7,10 +7,10 @@ export interface Client extends Document {
     algoName: Algorithms;
     secret: string;
     apiPublicKey: string;
-    redirectUrl: string;
+    basePath: string;
+    clientEndpoint: string;
     dailyLimit: Number;
-    monthlyLimit: Number;
-    yearlyLimit: Number;
+    hitCount: Number;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -20,10 +20,10 @@ export const ClientSchema: Schema = new Schema({
     algoName: { type: String, required: true, default: 'HS256' },
     secret: { type: String, required: true, unique: true },
     apiPublicKey: { type: String, required: true, unique: true, immutable: true },
-    redirectUrl: { type: String, required: false },
+    basePath: { type: String, required: true },
+    clientEndpoint: { type: String, required: true },
     dailyLimit: { type: Number, required: false, default: 0 },
-    monthlyLimit: { type: Number, required: false, default: 0 },
-    yearlyLimit: { type: Number, required: false, default: 0 },
+    hitCount: { type: Number, required: false, default: 0 },
 }, {
     timestamps: true
 });

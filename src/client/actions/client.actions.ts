@@ -1,13 +1,11 @@
+import { ClientState } from "client/reducers/client.reducer";
 import { AnyAction, Dispatch } from "redux";
 import { clientConstants } from "../../client/constants/client.constants";
 import { SuccessResponse } from "../../client/services";
 import clientServices from "../../client/services/client.services";
 import { Client } from "../../models/Client";
-import { alertActions } from "./alert.actions";
 
-interface ClientSuccessResponse extends Partial<SuccessResponse> {
-    clients: Client[];
-}
+interface ClientSuccessResponse extends Partial<SuccessResponse>, Partial<ClientState> {}
 
 class ClientActions {
     public getAll() {
@@ -17,10 +15,10 @@ class ClientActions {
             });
 
             try {
-                const { clients }: ClientSuccessResponse = await clientServices.getAll();
+                const { list }: ClientSuccessResponse = await clientServices.getAll();
                 dispach({
                     type: clientConstants.GETALL_SUCCESS,
-                    clients
+                    list
                 });
             } catch (error: any) {
                 dispach({

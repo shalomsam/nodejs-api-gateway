@@ -4,13 +4,13 @@ import { Client } from "../../models/Client";
 
 export interface ClientState {
     isLoading: boolean;
-    clients?: Client[];
+    list?: Client[];
     error?: any;
 }
 
 export interface IClientActions extends AnyAction, ClientState {};
 
-export const initialState: ClientState = { isLoading: false, clients: [] };
+export const initialState: ClientState = { isLoading: false, list: [] };
 
 export const clients = (state: ClientState = initialState, action: IClientActions) => {
     switch (action.type) {
@@ -22,7 +22,7 @@ export const clients = (state: ClientState = initialState, action: IClientAction
         case clientConstants.GETALL_SUCCESS:
             return {
                 isLoading: false,
-                clients: action.clients,
+                list: action.list,
             };
 
         case clientConstants.GETALL_FAILURE:

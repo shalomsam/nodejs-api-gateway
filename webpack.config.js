@@ -4,6 +4,7 @@ const nodeExternals = require('webpack-node-externals');
 const dotenv = require('dotenv');
 const webpack = require('webpack');
 const path = require('path');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 
 // /** @type WebpackConfig[] */
@@ -39,6 +40,10 @@ const configs = (env, options) => {
                         loader: 'ts-loader',
                         exclude: path.resolve(__dirname, './src/config') // excluded to minimize risk of exposure
                     },
+                    {
+                        test: /\.css$/i,
+                        use: ["style-loader", "css-loader"],
+                    }
                 ],
             },
         },
@@ -55,10 +60,8 @@ const configs = (env, options) => {
                 extensions: ['.ts', '.tsx', '.js', '.jsx', '.hbs'],
             },
             plugins: [
-                // new webpack.DefinePlugin({
-                //     "process.env": JSON.parse(JSON.stringify(_dotenv.parsed)),
-                // }),
                 new webpack.EnvironmentPlugin(Object.keys(_dotenv.parsed || {})),
+                new MiniCssExtractPlugin(),
             ],
             // Source maps support ('inline-source-map' also works)
             devtool: 'source-map',
@@ -74,6 +77,10 @@ const configs = (env, options) => {
                       test: /\.hbs$/,
                       loader: "handlebars-loader"
                     },
+                    {
+                        test: /\.css$/i,
+                        use: [MiniCssExtractPlugin.loader, "css-loader"],
+                    }
                 ],
             },
             target: 'node',

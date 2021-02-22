@@ -32,7 +32,7 @@ export const authenticate = async (req: express.Request, res: express.Response):
     const { jwtPayload } = (res.locals as JwtLocals);
     const user: UserDoc = await UserModel.findOne({ email });
 
-    let isValid = user.comparePassword(password);
+    let isValid = user?.comparePassword(password);
     isValid = isValid && jwtPayload.clientApiKey === clientApiKey;
 
     if (isValid) {

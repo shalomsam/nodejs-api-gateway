@@ -3,6 +3,10 @@ import { ApiResponse } from "../utils/http";
 import ClientModel, { Client } from "../models/Client";
 import Roles from "../models/Roles";
 import { JwtLocals } from "../middleware/jwt.middleware";
+import { uuid } from "short-uuid";
+import crypto from "crypto";
+import logger from "../utils/logger";
+import { ClientState } from "client/reducers/client.reducer";
 
 /**
  * Controller Method to get list on Clients
@@ -16,7 +20,8 @@ import { JwtLocals } from "../middleware/jwt.middleware";
  */
 export const getClient = async (req: express.Request, res: express.Response): Promise<express.Response> => {
     const user = (res.locals as JwtLocals).user;
-    console.log('payload >> ', (res.locals as JwtLocals).jwtPayload);
+    logger.debug('payload >> ', (res.locals as JwtLocals).jwtPayload);
+
     if (!user) {
         return res.status(ApiResponse.UNAUTH.statusCode).json(ApiResponse.UNAUTH);
     }
@@ -32,8 +37,8 @@ export const getClient = async (req: express.Request, res: express.Response): Pr
 
     return res.status(ApiResponse.OK.statusCode).json({
         ...ApiResponse.OK,
-        clientList,
-    });
+        list: clientList,
+    } as Partial<ClientState>);
 }
 
 
@@ -52,7 +57,9 @@ export const addClient = async (req: express.Request, res: express.Response): Pr
     if (!user) {
         return res.status(ApiResponse.UNAUTH.statusCode).json(ApiResponse.UNAUTH);
     }
-    const client = req.body as Client;
+    let client = req.body as Partial<Client>;
+    client.apiPublicKey = uuid();
+    client.secret = crypto.randomBytes(256).toString('base64');
     const newClient = new ClientModel(client);
     const saved = await newClient.save();
     return res.status(ApiResponse.OK.statusCode).json({

@@ -3,6 +3,7 @@ import React, { FC, useState } from 'react';
 interface IOptions {
     label: string;
     value: string;
+    isSelected?: boolean;
 }
 
 interface InputStatus {

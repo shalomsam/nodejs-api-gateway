@@ -21,22 +21,16 @@ function App() {
     }, []);
 
     return (
-        <div className="jumbotron">
-            <div className="container">
-                <div className="col-md-8 offset-md-2">
-                    {alert.message &&
-                        <div className={`alert ${alert.type}`}>{alert.message}</div>
-                    }
-                    {/* <Router history={history}> */}
-                        <Switch>
-                            <PrivateRoute exact path="/" component={HomePage} />
-                            <Route path="/login" component={LoginPage} />
-                            <Route path="/register" component={RegisterPage} />
-                            <Redirect from="*" to="/" />
-                        </Switch>
-                    {/* </Router> */}
-                </div>
-            </div>
+        <div className="container">
+            {alert.message &&
+                <div className={`alert ${alert.type}`}>{alert.message}</div>
+            }
+            <Switch>
+                <PrivateRoute exact path="/" component={HomePage} />
+                <Route path="/login" component={LoginPage} />
+                <Route path="/register" component={RegisterPage} />
+                <Redirect from="*" to="/" />
+            </Switch>
         </div>
     );
 }

@@ -3,8 +3,6 @@ import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import { globalConfig } from '../../config';
-import UserModel from '../../models/User';
-import Roles from '../../models/Roles';
 let { clientApiKey, clientKeys, appEnv } = globalConfig;
 
 export default function setup() {

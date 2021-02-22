@@ -1,17 +1,22 @@
 import React, { FC } from 'react';
 
 interface FormProps {
-    submit: (formData: FormData, el: EventTarget, e: React.FormEvent) => void;
+    submit: (data: object, el: EventTarget, e: React.FormEvent, formData?: FormData) => void;
 }
 
 const Form: FC<FormProps> = ({ children, submit }) => {
 
     return (
         <form onSubmit={(e) => {
+            e.preventDefault();
             const el = e.target;
             const formData = new FormData(e.target as any);
-            submit(formData, el, e)
-            e.preventDefault();
+            let object = {};
+            formData.forEach((value, key) => {
+                object[key] = value;
+            });
+            
+            submit(object, el, e, formData);
         }}>
             {children}
         </form>
