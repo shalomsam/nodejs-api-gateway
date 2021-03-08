@@ -2,10 +2,10 @@ import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { userActions } from '../actions';
-import { RootState } from '../../client/helpers';
-import clientActions from '../../client/actions/client.actions';
-import ClientList from '../../client/components/ClientList';
+import { userActions } from '../../actions';
+import { RootState } from '../../helpers';
+import clientActions from '../../actions/client.actions';
+import ClientList from '../../components/ClientList';
 
 function HomePage() {
     const clients = useSelector((state: RootState) => {
@@ -31,7 +31,7 @@ function HomePage() {
             {clients?.isLoading && <em>Loading Clients...</em>}
             {clients?.error && <span className="text-danger">ERROR: {clients?.error?.message}</span>}
             {!clients?.isLoading && !clients?.error && (
-                <ClientList list={clients.list} />   
+                <ClientList list={clients?.list} />   
             )}
             <p>
                 <Link to="/login">Logout</Link>

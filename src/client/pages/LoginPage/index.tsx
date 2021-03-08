@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { userActions } from '../actions';
-import { RootState } from '../helpers';
-import { AuthStatus } from '../reducers/auth.reducer';
+import { userActions } from '../../actions';
+import { RootState } from '../../helpers';
+import { AuthStatus } from '../../reducers/auth.reducer';
 
 function LoginPage() {
     const [inputs, setInputs] = useState({
@@ -19,7 +19,7 @@ function LoginPage() {
 
     // reset login status
     useEffect(() => { 
-        dispatch(userActions.logout()); 
+        dispatch(userActions.logout());
     }, []);
 
     function handleChange(e: any) {

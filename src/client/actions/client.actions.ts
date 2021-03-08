@@ -3,7 +3,6 @@ import { AnyAction, Dispatch } from "redux";
 import { clientConstants } from "../../client/constants/client.constants";
 import { SuccessResponse } from "../../client/services";
 import clientServices from "../../client/services/client.services";
-import { Client } from "../../models/Client";
 
 interface ClientSuccessResponse extends Partial<SuccessResponse>, Partial<ClientState> {}
 

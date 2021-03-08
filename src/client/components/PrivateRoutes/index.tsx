@@ -1,8 +1,12 @@
 import React from 'react';
-import { Route, Redirect } from 'react-router-dom';
+import { Route, Redirect, RouteProps } from 'react-router-dom';
 import { isSSR } from '../../../client/helpers';
 
-function PrivateRoute({ component: Component, roles, ...rest }: any) {
+interface PrivateRouteProps extends RouteProps {
+    component: any;
+}
+
+const PrivateRoute: React.FunctionComponent<PrivateRouteProps> = ({ component: Component, ...rest }: PrivateRouteProps) => {
     return (
         <Route {...rest} render={props => {
             if (!isSSR && localStorage.getItem('user')) {

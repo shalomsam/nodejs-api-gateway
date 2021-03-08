@@ -10,6 +10,9 @@ import Button from '../Button';
 import Modal from '../Modal';
 import Form from '../Form/Form';
 import Field from '../Form/Field';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faClipboard } from '@fortawesome/free-solid-svg-icons';
+import Tooltip from '../Tooltip';
 
 interface Props {
     list: Client[];
@@ -52,7 +55,7 @@ const ClientList: FC<Props>  = ({ list = [], config }: Props) => {
     const content = list
         .sort((a, b) => (a.createdAt < b.createdAt) ? -1 : ((a.createdAt > b.createdAt) ? 1 : 0));
 
-    let headers = ['name', 'apiPublicKey', 'secret'];
+    let headers = ['name', 'apiPublicKey', 'secret', 'basePath', 'clientEndPoint'];
 
     return (
         <>
@@ -89,6 +92,39 @@ const ClientList: FC<Props>  = ({ list = [], config }: Props) => {
             <Table
                 columnHeaders={headers}
                 contents={content}
+                filters={{
+                    'secret': (value, key) => {
+                        const [show, setShow] = useState(false);
+                        const setTimeoutShow = (timeout = 500) => {
+                            setShow(true);
+                            setTimeout(() => {
+                                setShow(false)
+                            }, timeout);
+                        }
+                        return (
+                            <>
+                                <span className="d-inline-block text-truncate" style={{maxWidth: '150px'}}>
+                                    {value}
+                                </span>
+                                <div className="position-relative">
+                                    <FontAwesomeIcon
+                                        style={{ right: '1px', position: 'relative' }}
+                                        icon={faClipboard}
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(value);
+                                            setTimeoutShow();
+                                        }}
+                                    />
+                                    <Tooltip
+                                        show={show}
+                                    >
+                                        Copied!
+                                    </Tooltip>
+                                </div>
+                            </>
+                        )
+                    }
+                }}
             />
         </>
     )

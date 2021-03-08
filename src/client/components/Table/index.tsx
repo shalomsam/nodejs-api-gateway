@@ -1,11 +1,15 @@
 import { Client } from 'models/Client';
 import React from 'react';
 
+interface filters {
+    [key: string]: (value: any, key: string) => any; 
+}
 
 interface TableProps {
     columnHeaders: string[];
     contents?: any[];
     exclude?: string[];
+    filters?: filters;
     defaultMessage?: string;
 }
 
@@ -13,6 +17,7 @@ const Table: React.FC<TableProps> = ({
     columnHeaders,
     contents = [],
     exclude = [],
+    filters,
     defaultMessage = 'No rows available'
 }) => {
 
@@ -30,11 +35,17 @@ const Table: React.FC<TableProps> = ({
             >
                 {columnHeaders.map((prop: string, i: number) => {
                     const key = `${prop}-${i}`;
-                    if (exclude.length && exclude.indexOf(prop) > -1) {
-                        return <td key={key}>{content[prop]}</td>;
+                    let val = content[prop];
+
+                    if (filters && filters?.[prop]) {
+                        val = filters?.[prop](content[prop], prop);
                     }
 
-                    return <td className='col' key={key}>{content[prop]}</td>;
+                    if (exclude.length && exclude.indexOf(prop) > -1) {
+                        return <td key={key}>{val}</td>;
+                    }
+
+                    return <td className='col' key={key}>{val}</td>;
                 })}
             </tr>
         )

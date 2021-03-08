@@ -8,6 +8,7 @@ import { StaticRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { getStore } from '../client/helpers';
 import { App } from '../client/App';
+import { Helmet } from 'react-helmet';
 // import IndexFile from '../template/index.hbs';
 
 const IndexFile = require('../template/index.hbs');
@@ -39,7 +40,16 @@ export const showDashboard = async (req: express.Request, res: express.Response)
         </StaticRouter>
     );
 
-    const html = IndexFile({ app: reactApp, initialState });
+    const helmet = Helmet.renderStatic();
+
+    const html = IndexFile({
+        app: reactApp,
+        helmet: {
+            title: helmet.title.toString(),
+            metas: helmet.meta.toString()
+        },
+        initialState
+    });
 
     // NOTE: Fresh JWT Token is set on every request (to Server).
     let _res = res.status(ApiResponse.OK.statusCode)
