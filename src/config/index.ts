@@ -31,6 +31,7 @@ export const baseConfig = {
     cryptoSaltRounds: parseInt(process.env?.CRYPTO_SALT_ROUNDS || "10"),
     passwordMinLength: parseInt(process.env?.PASSWORD_MIN_LENTH || "6"),
     passwordMaxLength: parseInt(process.env?.PASSWORD_MAX_LENTH || "16"),
+    cacheTtl: parseInt(process.env?.CACHE_TTL || "0"),
 };
 
 

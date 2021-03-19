@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { checkSchema, body, param, Schema } from 'express-validator';
 import jwtMiddleware from '../../middleware/jwt.middleware';
 import { genToken, verifyToken } from '../../controllers/api.controller';
-import { addClient, getClient } from '../../controllers/client.controllers';
+import { addClient, getClient } from '../../controllers/client.controller';
 import { addNewUser, authenticate, resetPassword, updateUser } from '../../controllers/user.controller';
 import { globalConfig } from '../../config';
 import Roles from '../../models/Roles';
