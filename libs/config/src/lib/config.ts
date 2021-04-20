@@ -16,7 +16,7 @@ export const baseConfig: ConfigObject = {
     debug: !!process.env?.DEBUG,
     mongoConnectionString: process.env?.MONGO_CONNECTION_STRING || 'mongodb://127.0.0.1:27017/tokenmanager',
     jwtTtl: parseInt(process.env?.JWL_TTL) || 10 * 60 * 1000, //10 mins in milliseconds
-    algoName: process.env?.ALGO_NAME || "H256",
+    algoName: process.env?.ALGO_NAME || "HS256",
     apiKeyHandle: "tmAK",
     jwtTokenHandle: "tmJWT",
     cookieDomain: process.env?.COOKIE_DOMAIN || "",

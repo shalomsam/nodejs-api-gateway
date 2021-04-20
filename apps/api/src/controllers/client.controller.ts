@@ -35,7 +35,7 @@ export const getClient = async (req: Request, res: Response): Promise<Response> 
 
     return res.status(ApiResponse.OK.statusCode).json({
         ...ApiResponse.OK,
-        list: clientList,
+        clients: clientList,
     });
 }
 

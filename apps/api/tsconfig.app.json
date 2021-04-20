@@ -5,5 +5,5 @@
     "types": ["node", "express"]
   },
   "exclude": ["**/*.spec.ts"],
-  "include": ["**/*.ts"]
+  "include": ["**/*.ts", "**/*.js"]
 }

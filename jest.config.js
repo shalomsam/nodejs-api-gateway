@@ -4,5 +4,6 @@ module.exports = {
     '<rootDir>/apps/api',
     '<rootDir>/libs/node-jwt',
     '<rootDir>/libs/config',
+    '<rootDir>/libs/ui',
   ],
 };

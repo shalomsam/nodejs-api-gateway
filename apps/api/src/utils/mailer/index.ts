@@ -1,5 +1,5 @@
-import nodemailer from "nodemailer";
-import nodemailerConfig from "../../config/nodemailer.config";
+import nodemailer from 'nodemailer';
+import nodemailerConfig from '../../config/nodemailer.config';
 
 // Example
 //

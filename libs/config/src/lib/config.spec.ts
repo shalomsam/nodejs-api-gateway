@@ -34,7 +34,7 @@ describe('Config', () => {
   it('Config put should update property value', () => {
     const mockAlgoName = 'SomeAlgoName';
     const algoName = config.get('algoName');
-    expect(algoName).toBe('H256');
+    expect(algoName).toBe('HS256');
 
     config.put('algoName', mockAlgoName);
     expect(config.get('algoName')).toBe(mockAlgoName);

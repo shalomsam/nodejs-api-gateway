@@ -313,12 +313,17 @@ export class NodeJwt {
 
     public static getClaimsUnsafe(token: string): Partial<IClaims> {
         const parts = token.split('.');
+        if (parts.length < 3) {
+          throw new Error('Invalid token with no parts: ' + token);
+        }
         return JSON.parse(base64urldecode(parts[1]));
     }
 
     public static getJwtHeaderUnsafe(token: string): Partial<IJwtHead> {
         const parts = token.split('.');
-
+        if (parts.length < 3) {
+          throw new Error('Invalid token with no parts: ' + token);
+        }
         return JSON.parse(base64urldecode(parts[0]));
     }
 }
