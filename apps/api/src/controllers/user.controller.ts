@@ -199,7 +199,11 @@ export const updateUser = async (
       updateObj.resetToken = undefined;
       (updateObj as User).resetTokenExpires = undefined;
     }
-    const updatedUser = await UserModel.findByIdAndUpdate(req.params.id, updateObj, { new: true });
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      req.params.id,
+      updateObj,
+      { new: true }
+    );
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...rest } = updatedUser.toJSON();
     return res.status(ApiResponse.OK.statusCode).json({
@@ -228,15 +232,13 @@ export const resetPassword = async (
   res: Response
 ): Promise<Response> => {
   const { email } = req.body as Pick<User, 'email'>;
-  const { user, jwtPayload } = res.locals as JwtLocals;
+  const { user } = res.locals as JwtLocals;
 
   const userFromEmail = await UserModel.findOne({ email });
 
   // Check if req has valid adminClientKey + requesting user (jwt) email should match given email or requesting user must be an Admin
   const isValid =
-    jwtPayload?.adminClientKey === adminClientKey &&
-    userFromEmail &&
-    (user.email === email || user.role === Roles.Admin);
+    userFromEmail && (user.email === email || user.role === Roles.Admin);
 
   if (isValid) {
     const token = randomBytes(50).toString('hex');

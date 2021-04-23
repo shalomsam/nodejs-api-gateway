@@ -254,5 +254,79 @@ describe('User', () => {
           expect(response.body.user.firstName).toEqual(updateUser.firstName);
         });
     });
+
+    it('Should fail when user id in token does not match user id', async () => {
+      const userToken = NodeJwt.create(
+        algoName,
+        {
+          userId: mockAdminUserModel.id,
+          adminClientKey,
+        },
+        adminClientSecret
+      );
+
+      const updateUser: Partial<User> = {
+        firstName: 'firstNameEdit2',
+      };
+
+      await supertest(App)
+        .put('/api/v1/user/' + mockUserModel.id)
+        .set('Authorization', 'bearer ' + userToken)
+        .send(updateUser)
+        .expect(401)
+        .then(async (response) => {
+          expect(response.body).toStrictEqual(ApiResponse.UNAUTH);
+        });
+    });
+
+    it('Should pass if userId in JWT does not match provided id, but resetToken matches and is valid', async () => {
+      const adminUserToken = NodeJwt.create(
+        algoName,
+        {
+          userId: mockAdminUserModel.id,
+          adminClientKey,
+        },
+        adminClientSecret
+      );
+
+      const udpatableMockUser: Partial<User> = {
+        firstName: 'firstname',
+        lastName: 'lastname',
+        email: 'udpatableMockUser@test.com',
+        password: 'test',
+        role: Roles.User,
+        resetToken: 'resettoken',
+        resetTokenExpires: new Date().getTime() + 5 * 60 * 100,
+      };
+
+      const updateUser: Partial<User> = {
+        lastName: 'lastNameEdit',
+        password: 'newPassword',
+        resetToken: 'resettoken',
+      };
+
+      const udpatableMockUserModel = await UserModel.create(udpatableMockUser);
+
+      await supertest(App)
+        .put('/api/v1/user/' + udpatableMockUserModel.id)
+        .set('Authorization', 'bearer ' + adminUserToken)
+        .send(updateUser)
+        .expect(200)
+        .then(async (response) => {
+          expect(response.body.user).toBeTruthy();
+        });
+    });
+
+    xit('Should fail if reset token is expired', () => {
+      // TODO: write test
+    });
+
+    xit('Should not allow password update when no reset-token is provided', () => {
+      // TODO: write test
+    });
+
+    xit('Should update password as a hashed token', () => {
+      // TODO: write test
+    });
   });
 });
