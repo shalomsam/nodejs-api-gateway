@@ -1,0 +1,31 @@
+.tooltip-arrow {
+    width: 0;
+    height: 0;
+    border-color: #212529;
+    position: relative;
+    left: 50%;
+}
+
+.tooltip-arrow.arrow-up {
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid;
+}
+  
+.tooltip-arrow.arrow-down {
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid;
+}
+  
+.tooltip-arrow.arrow-right {
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 5px solid;
+}
+
+.tooltip-arrow.arrow-left {
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-right: 5px solid;
+}

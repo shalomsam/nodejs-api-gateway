@@ -1,27 +1,23 @@
-import React, { useEffect, useState } from 'react';
-import { Message } from '@node-api-gateway/api-interfaces';
+import React from 'react';
+import { Route, Switch, Redirect, BrowserRouter } from 'react-router-dom';
+import { PrivateRoute } from '../helpers/PrivateRoute';
+import Home from '../pages/Dashboard/Home';
+import LoginPage from '../pages/LoginPage';
+import RegisterPage from '../pages/RegisterPage';
 
-export const App = () => {
-  const [m, setMessage] = useState<Message>({ message: '' });
 
-  useEffect(() => {
-    fetch('/api')
-      .then((r) => r.json())
-      .then(setMessage);
-  }, []);
+function App() {
 
   return (
-    <>
-      <div style={{ textAlign: 'center' }}>
-        <h1>Welcome to api-gateway-admin!</h1>
-        <img
-          width="450"
-          src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png"
-        />
-      </div>
-      <div>{m.message}</div>
-    </>
+    <BrowserRouter>
+      <Switch>
+        <PrivateRoute exact path="/home" component={Home} />
+        <Route exact path="/login" component={LoginPage} />
+        <Route exact path="/register" component={RegisterPage} />
+        <Redirect from="*" to="/login" />
+      </Switch>
+    </BrowserRouter>
   );
-};
+}
 
 export default App;

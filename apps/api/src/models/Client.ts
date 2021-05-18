@@ -1,9 +1,7 @@
 import { Schema, Document, model } from 'mongoose';
 import { Client } from '@node-api-gateway/api-interfaces';
 
-export interface ClientDoc extends Document, Client {
-  _id?: string;
-}
+export type ClientDoc = Document & Client;
 
 export const ClientSchema: Schema = new Schema(
   {

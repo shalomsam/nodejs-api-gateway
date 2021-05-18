@@ -1,5 +1,5 @@
 export interface Client {
-  id?: string;
+  _id?: string;
   name: string;
   algoName: string;
   secret: string;

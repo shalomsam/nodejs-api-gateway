@@ -17,8 +17,8 @@ export const baseConfig: ConfigObject = {
     mongoConnectionString: process.env?.MONGO_CONNECTION_STRING || 'mongodb://127.0.0.1:27017/tokenmanager',
     jwtTtl: parseInt(process.env?.JWL_TTL) || 10 * 60 * 1000, //10 mins in milliseconds
     algoName: process.env?.ALGO_NAME || "HS256",
-    apiKeyHandle: "tmAK",
-    jwtTokenHandle: "tmJWT",
+    apiKeyHandle: process.env.REACT_APP_API_KEY_HANDLE || "apiKey",
+    jwtTokenHandle: process.env.REACT_APP_JWT_HANDLE || "accessToken",
     cookieDomain: process.env?.COOKIE_DOMAIN || "",
     adminClientKey: process.env?.ADMIN_CLIENT_API_KEY || "",
     adminClientSecret: process.env?.ADMIN_CLIENT_API_SECRET || "",
@@ -27,7 +27,6 @@ export const baseConfig: ConfigObject = {
     passwordMaxLength: parseInt(process.env?.PASSWORD_MAX_LENTH || "16"),
     cacheTtl: parseInt(process.env?.CACHE_TTL || "0"),
 };
-
 
 export class Config {
     private config: ConfigObject = baseConfig;

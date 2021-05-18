@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { NodeJwt, IClaims } from '@node-api-gateway/node-jwt';
 import { ApiResponse } from '@node-api-gateway/api-interfaces';
-import { getToken, isValidAdminApiKey } from '../utils/helpers';
+import { getApiKey, getToken, isValidAdminApiKey } from '../utils/helpers';
 import { globalConfig } from '@node-api-gateway/config';
 import UserModel, { UserDoc } from '../models/User';
 
@@ -14,22 +14,42 @@ export interface JwtPayload extends IClaims {
   issuerid: string;
   adminClientKey: string;
 }
-export interface JwtLocals {
-  token: string;
-  jwtPayload: JwtPayload;
-  user: Partial<UserDoc>;
-}
+
+export type JwtLocals =
+  | {
+      hasOneUser: true;
+      token: string;
+      jwtPayload: JwtPayload;
+      user: Partial<UserDoc>;
+    }
+  | {
+      hasOneUser: false;
+      token: never;
+      jwtPayload: never;
+      user: never;
+    };
 
 const jwtMiddleware = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  // TODO: extract as util?
   const token = getToken(req);
+  const apiKey = getApiKey(req);
+  // const cacheKey = 'hasOneUser';
 
-  if (!token) {
+  const hasOneUser = Boolean(await UserModel.findOne());
+  res.locals.hasOneUser = hasOneUser;
+
+  if (hasOneUser && !token) {
     return res.status(ApiResponse.BAD.statusCode).json(ApiResponse.BAD);
+  } else if (!hasOneUser && !apiKey) {
+    return res.status(ApiResponse.BAD.statusCode).json(ApiResponse.BAD);
+  }
+
+  if (!hasOneUser && !token) {
+    next();
+    return;
   }
 
   const payload = NodeJwt.getClaimsUnsafe(token);
@@ -39,6 +59,7 @@ const jwtMiddleware = async (
   if (
     !userId &&
     isValidAdminApiKey(adminClientKey) &&
+    token &&
     NodeJwt.verify(token, adminClientSecret)
   ) {
     return res.status(ApiResponse.UNAUTH.statusCode).json(ApiResponse.UNAUTH);

@@ -1,7 +1,7 @@
 import { Roles } from '@node-api-gateway/api-interfaces';
 
 export interface User {
-  id?: string;
+  _id?: string;
   email: string;
   password: string;
   firstName: string;

@@ -60,12 +60,12 @@ export type AuthSuccess = ApiSuccess<{
 export type UserSuccess = ApiSuccess<
   (
     | {
-        user: Partial<User>;
+        user: User;
         users: never;
       }
     | {
         user: never;
-        users: Partial<User>[];
+        users: User[];
       }
   ) & {
     accessToken: string;
@@ -76,3 +76,11 @@ export type UserResetPasswordSuccess = ApiSuccess<{
   resetToken: string;
   expires: number;
 }>;
+
+
+export enum HttpStatus {
+  initial = 'initial',
+  loading = 'loading',
+  success = 'success',
+  error = 'error',
+}

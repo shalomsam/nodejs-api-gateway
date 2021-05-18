@@ -29,6 +29,8 @@
     "api": { "tags": [] },
     "api-interfaces": { "tags": [] },
     "node-jwt": { "tags": [] },
-    "config": { "tags": [] }
+    "config": { "tags": [] },
+    "ui": { "tags": [] },
+    "ui-e2e": { "tags": [], "implicitDependencies": ["ui"] }
   }
 }

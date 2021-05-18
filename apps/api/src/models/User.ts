@@ -5,12 +5,13 @@ import { globalConfig } from '@node-api-gateway/config';
 
 const { cryptoSaltRounds } = globalConfig;
 
-export interface UserDoc extends User, Document {
-  createdAt: Date;
-  updatedAt: Date;
-  comparePassword: (givenPass: string, cb?: voidFn) => void | boolean;
-  isAdmin: () => boolean;
-}
+export type UserDoc = User &
+  Document & {
+    createdAt: Date;
+    updatedAt: Date;
+    comparePassword: (givenPass: string, cb?: voidFn) => void | boolean;
+    isAdmin: () => boolean;
+  };
 
 export const UserSchema = new Schema(
   {

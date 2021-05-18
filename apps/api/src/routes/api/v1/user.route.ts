@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { checkSchema, body, param, Schema } from 'express-validator';
 import jwtMiddleware from '../../../middleware/jwt.middleware';
+import apiKeyMiddleware from '../../../middleware/apiKey.middleware';
 import {
   addNewUser,
   authenticate,
@@ -43,18 +44,18 @@ const UserSchema: Schema = {
 const router = Router();
 router.post(
   '/user/authenticate',
-  body('email').isEmail().normalizeEmail(),
+  body('email').isEmail(),
   body('password')
     .notEmpty()
     .isStrongPassword({ minLength: passwordMinLength })
     .isLength({ max: passwordMaxLength }),
-  jwtMiddleware,
+  apiKeyMiddleware,
   authenticate
 );
 // Reset User Password
 router.post(
   '/user/resetpassword',
-  body('email').isEmail().normalizeEmail(),
+  body('email').isEmail(),
   jwtMiddleware,
   resetPassword
 );

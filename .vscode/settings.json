@@ -1,8 +1,7 @@
 {
     "editor.tabSize": 2,
     "editor.detectIndentation": false,
-    "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnType": true,
-    "editor.formatOnPaste": true
+    "editor.formatOnPaste": true,
+    "debug.javascript.autoAttachFilter": "disabled"
 }

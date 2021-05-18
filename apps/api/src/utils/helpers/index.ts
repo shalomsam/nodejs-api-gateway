@@ -2,7 +2,8 @@ import type { Request } from 'express';
 import { ApiResponse } from '@node-api-gateway/api-interfaces';
 import { globalConfig } from '@node-api-gateway/config';
 
-const { apiKeyHandle, jwtTokenHandle, adminClientKey } = globalConfig;
+let { apiKeyHandle, jwtTokenHandle } = globalConfig;
+const { adminClientKey } = globalConfig;
 
 /**
  * Method to get Public API Key from request.
@@ -10,6 +11,7 @@ const { apiKeyHandle, jwtTokenHandle, adminClientKey } = globalConfig;
  * @param {Request} req Express Request.
  */
 export const getApiKey = (req: Request) => {
+  apiKeyHandle = apiKeyHandle.toLocaleLowerCase();
   if (req?.query?.[apiKeyHandle]) {
     return req.query[apiKeyHandle];
   } else if (req?.headers?.[`x-${apiKeyHandle}`]) {
@@ -29,6 +31,7 @@ export const getApiKey = (req: Request) => {
  * @param {Request} req Express Request.
  */
 export const getToken = (req: Request) => {
+  jwtTokenHandle = jwtTokenHandle.toLocaleLowerCase();
   if (req?.query?.[jwtTokenHandle]) {
     return req.query[jwtTokenHandle];
   } else if (req?.headers?.authorization) {
@@ -59,4 +62,7 @@ export const apiNotFoundHandler = function (req, res) {
   return res.type('txt').send('Not found');
 };
 
-export const isValidAdminApiKey = (apiKey: string) => adminClientKey === apiKey;
+export const isValidAdminApiKey = (apiKey: string) => {
+  console.log('adminClientKey >> ', adminClientKey);
+  return adminClientKey === apiKey;
+};

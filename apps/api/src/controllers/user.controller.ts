@@ -16,7 +16,7 @@ const {
 
 /**
  * Controller Method to authenticate user.
- * The request must have a valid token with a ClientApiKey.
+ * The request must have a valid client ApiKey.
  *
  * @route POST /api/v1/user/authenticate
  * @group Users
@@ -118,7 +118,7 @@ export const addNewUser = async (
     User,
     'email' | 'firstName' | 'password' | 'lastName' | 'role'
   >;
-  const { user } = res.locals as JwtLocals;
+  const { user, hasOneUser } = res.locals as JwtLocals;
   newUser.role = newUser?.role || Roles.User;
 
   const newUserObj = await UserModel.findOne({ email: newUser.email });
@@ -127,7 +127,7 @@ export const addNewUser = async (
   const errors = [];
 
   // Requesting user must be an Admin
-  if (!user.isAdmin() && adminUsers) {
+  if (hasOneUser && !user.isAdmin() && adminUsers) {
     errors.push({
       message: 'New users additions can only be requested from an Admin.',
     });
