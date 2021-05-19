@@ -34,7 +34,7 @@ const ClientList: FC<Props> = ({ list = [] }: Props) => {
     'apiPublicKey',
     'secret',
     'basePath',
-    'clientEndPoint',
+    'clientEndpoint',
   ];
 
   return (
@@ -52,7 +52,7 @@ const ClientList: FC<Props> = ({ list = [] }: Props) => {
             <Field
               type="text"
               label="Name"
-              placeholder="Client App/Service Name"
+              placeholder="Client App Name OR Service Name"
               name="name"
               value=""
             />
@@ -62,6 +62,20 @@ const ClientList: FC<Props> = ({ list = [] }: Props) => {
               placeholder="Daily rate limit for Client App/Service (0 = unlimited)"
               name="dailyLimit"
               value="0"
+            />
+            <Field
+              type="text"
+              label="BasePath"
+              placeholder="BasePath is the path to assign to this Client/Service under the GateWay domain (eg: portal.domain.com{/basePath})"
+              name="basePath"
+              value=""
+            />
+            <Field
+              type="text"
+              label="Client URL/IP"
+              placeholder="URL/IP to the application host (eg: https://www.domain.com/api/v1/)"
+              name="clientEndpoint"
+              value=""
             />
             <Button type="submit">Add New</Button>
           </Form>
