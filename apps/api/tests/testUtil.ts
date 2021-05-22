@@ -4,10 +4,6 @@ import { connect, connection } from 'mongoose';
 let mongoServer: MongoMemoryServer;
 
 export const beforeAllHelper = async (done?: (...args) => void) => {
-  // Set Required Env Variables
-  process.env.ADMIN_CLIENT_API_KEY = 'AdminTestKey';
-  process.env.ADMIN_CLIENT_API_SECRET = 'AdminTestSecret';
-
   // Start Mongo Memory Server
   mongoServer = new MongoMemoryServer();
   const mongoUri = await mongoServer.getUri();

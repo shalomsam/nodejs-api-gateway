@@ -18,7 +18,8 @@
       "@node-api-gateway/api-interfaces": ["libs/api-interfaces/src/index.ts"],
       "@node-api-gateway/node-jwt": ["libs/node-jwt/src/index.ts"],
       "@node-api-gateway/config": ["libs/config/src/index.ts"],
-      "@node-api-gateway/ui": ["libs/ui/src/index.ts"]
+      "@node-api-gateway/ui": ["libs/ui/src/index.ts"],
+      "@node-api-gateway/validators": ["libs/validators/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

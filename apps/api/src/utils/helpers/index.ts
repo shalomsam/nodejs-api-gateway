@@ -1,6 +1,7 @@
 import type { Request } from 'express';
 import { ApiResponse } from '@node-api-gateway/api-interfaces';
 import { globalConfig } from '@node-api-gateway/config';
+import logger from '../logger';
 
 let { apiKeyHandle, jwtTokenHandle } = globalConfig;
 const { adminClientKey } = globalConfig;
@@ -14,8 +15,8 @@ export const getApiKey = (req: Request) => {
   apiKeyHandle = apiKeyHandle.toLocaleLowerCase();
   if (req?.query?.[apiKeyHandle]) {
     return req.query[apiKeyHandle];
-  } else if (req?.headers?.[`x-${apiKeyHandle}`]) {
-    return req.headers[`x-${apiKeyHandle}`];
+  } else if (req?.headers?.[apiKeyHandle]) {
+    return req.headers[apiKeyHandle];
   } else if (req?.cookies?.[apiKeyHandle]) {
     return req.cookies[apiKeyHandle];
   } else if (req?.body?.[apiKeyHandle]) {
@@ -63,6 +64,6 @@ export const apiNotFoundHandler = function (req, res) {
 };
 
 export const isValidAdminApiKey = (apiKey: string) => {
-  console.log('adminClientKey >> ', adminClientKey);
+  logger.debug('adminClientKey >> ', adminClientKey, ' >> Given >> ', apiKey);
   return adminClientKey === apiKey;
 };

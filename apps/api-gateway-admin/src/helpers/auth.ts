@@ -10,7 +10,7 @@ export function getHeaders() {
   } : {};
 
   return {
-    [`x-${API_KEY}`]: apiKey,
+    [API_KEY]: apiKey,
     'Content-Type': 'application/json',
     ...token,
   };

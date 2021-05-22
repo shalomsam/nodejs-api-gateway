@@ -5,5 +5,6 @@ module.exports = {
     '<rootDir>/libs/node-jwt',
     '<rootDir>/libs/config',
     '<rootDir>/libs/ui',
+    '<rootDir>/libs/validators',
   ],
 };

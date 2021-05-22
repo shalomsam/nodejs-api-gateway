@@ -9,10 +9,8 @@ const apiKeyMiddleware = (
 ) => {
   const apiKey = getApiKey(req);
 
-  console.log('apiKey >', apiKey);
-
   if (!isValidAdminApiKey(apiKey)) {
-    return res.status(ApiResponse.UNAUTH.statusCode).json(ApiResponse.UNAUTH);
+    return res.status(ApiResponse.BAD.statusCode).json(ApiResponse.BAD);
   }
 
   next();

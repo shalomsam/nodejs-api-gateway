@@ -11,8 +11,9 @@ jasmine.DEFAULT_TIMEOUT_INTERVAL = 600000;
 let mockAdminUserModel: UserDoc;
 let mockUserModel: UserDoc;
 let token: string;
-let adminClientKey: string;
+let adminApiKey: string;
 let adminClientSecret: string;
+let adminApiKeyHandle: string;
 
 const mockAdmin = {
   firstName: 'firstnameAdmin',
@@ -26,7 +27,7 @@ const mockUser = {
   firstName: 'firstname',
   lastName: 'lastname',
   email: 'test@test.com',
-  password: 'test',
+  password: 'test12345',
   role: Roles.User,
 };
 
@@ -39,10 +40,11 @@ beforeAll(async () => {
 
   mockUserModel = await UserModel.create(mockUser);
 
-  adminClientKey = process.env.ADMIN_CLIENT_API_KEY;
+  adminApiKey = process.env.ADMIN_CLIENT_API_KEY;
   adminClientSecret = process.env.ADMIN_CLIENT_API_SECRET;
+  adminApiKeyHandle = process.env.NX_REACT_APP_API_KEY_HANDLE;
 
-  token = NodeJwt.create(algoName, { adminClientKey }, adminClientSecret);
+  token = NodeJwt.create(algoName, { adminApiKey }, adminClientSecret);
 });
 
 afterAll((done) => afterAllHelper(done));
@@ -55,7 +57,7 @@ describe('User', () => {
       const { firstName, lastName, email, id } = mockAdminUserModel;
       await supertest(App)
         .post('/api/v1/user/authenticate')
-        .set('Authorization', 'bearer ' + token)
+        .set(adminApiKeyHandle, adminApiKey)
         .send({
           email: mockAdmin.email,
           password: mockAdmin.password,
@@ -73,7 +75,7 @@ describe('User', () => {
     it('Invalid password (or email) should return an UnAuth response', async () => {
       await supertest(App)
         .post('/api/v1/user/authenticate')
-        .set('Authorization', 'bearer ' + token)
+        .set(adminApiKeyHandle, adminApiKey)
         .send({
           email: 'test@test.com',
           password: 'invalidPassword',
@@ -84,7 +86,7 @@ describe('User', () => {
         });
     });
 
-    it('Should fail when no token is provided', async () => {
+    it('Should fail when no ApiKey is provided', async () => {
       await supertest(App)
         .post('/api/v1/user/authenticate')
         .send({
@@ -104,7 +106,7 @@ describe('User', () => {
         algoName,
         {
           userId: mockAdminUserModel.id,
-          adminClientKey,
+          adminClientKey: adminApiKey,
         },
         adminClientSecret
       );
@@ -128,7 +130,7 @@ describe('User', () => {
       const invalidToken = NodeJwt.create(
         algoName,
         {
-          adminClientKey,
+          adminClientKey: adminApiKey,
         },
         adminClientSecret
       );
@@ -150,7 +152,7 @@ describe('User', () => {
         algoName,
         {
           userId: mockAdminUserModel.id,
-          adminClientKey,
+          adminClientKey: adminApiKey,
         },
         adminClientSecret
       );
@@ -181,7 +183,7 @@ describe('User', () => {
         algoName,
         {
           userId: mockUserModel.id,
-          adminClientKey,
+          adminClientKey: adminApiKey,
         },
         adminClientSecret
       );
@@ -211,13 +213,14 @@ describe('User', () => {
         algoName,
         {
           userId: mockAdminUserModel.id,
-          adminClientKey,
+          adminClientKey: adminApiKey,
         },
         adminClientSecret
       );
 
       await supertest(App)
         .post('/api/v1/user')
+        .set(adminApiKeyHandle, adminApiKey)
         .set('Authorization', 'bearer ' + userToken)
         .send(mockUser)
         .expect(401)
@@ -236,7 +239,7 @@ describe('User', () => {
         algoName,
         {
           userId: mockUserModel.id,
-          adminClientKey,
+          adminClientKey: adminApiKey,
         },
         adminClientSecret
       );
@@ -260,7 +263,7 @@ describe('User', () => {
         algoName,
         {
           userId: mockAdminUserModel.id,
-          adminClientKey,
+          adminClientKey: adminApiKey,
         },
         adminClientSecret
       );
@@ -284,7 +287,7 @@ describe('User', () => {
         algoName,
         {
           userId: mockAdminUserModel.id,
-          adminClientKey,
+          adminClientKey: adminApiKey,
         },
         adminClientSecret
       );
