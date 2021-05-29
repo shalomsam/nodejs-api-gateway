@@ -8,9 +8,7 @@ export interface ModalProps {
 }
 
 const defaultOnClose = () => {
-  console.warn(
-    'Modal: `onClose` callback fn should set prop showModal to false!'
-  );
+  return null;
 };
 
 export const Modal: FC<ModalProps> = ({
@@ -23,6 +21,7 @@ export const Modal: FC<ModalProps> = ({
   const [show, setShow] = useState('');
 
   const closeFn = () => {
+    setShow('');
     setTimeout(() => {
       onClose();
     }, timeOut);

@@ -13,10 +13,10 @@ const validatorMiddleware = (schema) => async (
     await schema.validate(body);
     return next();
   } catch (e) {
-    console.log('Validator Error: ', e);
+    logger.debug('Validator Error: ', e);
     return res.status(ApiResponse.BAD.statusCode).json({
       ...ApiResponse.BAD,
-      error: e
+      error: {message: e.message},
     });
   }
 }
