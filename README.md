@@ -1,94 +1,42 @@
-
-
 # NodeApiGateway
 
-This project was generated using [Nx](https://nx.dev).
+This is a experimental implementation of a nodejs based API Gateway server. This project was generated using [Nx](https://nx.dev). This project has to two main apps/components. The API responsible for CRUD operations on the data held in a MongoDb database for the functioning of the Gateway. The second is UI/Frontend app that constitutes the dashboard for managing the various app related data for the Gateway.
 
-<p align="center"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="450"></p>
+## API
 
-🔎 **Nx is a set of Extensible Dev Tools for Monorepos.**
+The `API` is build typescript and Express server. It runs CRUD operations and connects to the [MongoDb database of your choosing](#mongo-db).
 
-## Adding capabilities to your workspace
+## Gateway Admin
 
-Nx supports many plugins which add capabilities for developing different types of applications and different tools.
-
-These capabilities include generating applications, libraries, etc as well as the devtools to test, and build projects as well.
-
-Below are our core plugins:
-
-- [React](https://reactjs.org)
-  - `npm install --save-dev @nrwl/react`
-- Web (no framework frontends)
-  - `npm install --save-dev @nrwl/web`
-- [Angular](https://angular.io)
-  - `npm install --save-dev @nrwl/angular`
-- [Nest](https://nestjs.com)
-  - `npm install --save-dev @nrwl/nest`
-- [Express](https://expressjs.com)
-  - `npm install --save-dev @nrwl/express`
-- [Node](https://nodejs.org)
-  - `npm install --save-dev @nrwl/node`
-
-There are also many [community plugins](https://nx.dev/nx-community) you could add.
-
-## Generate an application
-
-Run `nx g @nrwl/react:app my-app` to generate an application.
-
-> You can use any of the plugins above to generate applications as well.
-
-When using Nx, you can create multiple applications and libraries in the same workspace.
-
-## Generate a library
-
-Run `nx g @nrwl/react:lib my-lib` to generate a library.
-
-> You can also use any of the plugins above to generate libraries as well.
-
-Libraries are shareable across libraries and applications. They can be imported from `@node-api-gateway/mylib`.
-
-## Development server
-
-Run `nx serve my-app` for a dev server. Navigate to http://localhost:4200/. The app will automatically reload if you change any of the source files.
-
-## Code scaffolding
-
-Run `nx g @nrwl/react:component my-component --project=my-app` to generate a new component.
-
-## Build
-
-Run `nx build my-app` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
-
-## Running unit tests
-
-Run `nx test my-app` to execute the unit tests via [Jest](https://jestjs.io).
-
-Run `nx affected:test` to execute the unit tests affected by a change.
-
-## Running end-to-end tests
-
-Run `ng e2e my-app` to execute the end-to-end tests via [Cypress](https://www.cypress.io).
-
-Run `nx affected:e2e` to execute the end-to-end tests affected by a change.
-
-## Understand your workspace
-
-Run `nx dep-graph` to see a diagram of the dependencies of your projects.
-
-## Further help
-
-Visit the [Nx Documentation](https://nx.dev) to learn more.
+The Gateway Admin is the UI dashboard to add/remove application/service to the gateway. The public & secret keys are auto generated. 
 
 
+# Installation
 
-## ☁ Nx Cloud
+To install simply clone/fork this repository and cd into the relavent directory. Before we can run the application we need to generate security keys for the applications security and we also need a MongoDb Database. You can manually install MongoDb from the [MongoDb Installation Page](https://docs.mongodb.com/manual/installation/) using the instructions given there for your device or you could use the cloud based solution such as [Atlas](https://www.mongodb.com/atlas/database). 
 
-### Computation Memoization in the Cloud
+## Generate Keys
 
-<p align="center"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-cloud-card.png"></p>
+To run the application we need to generate some public/secret keys required for Authentication on the application. To generate this you can run `npm run authSetup`. This will generate a `.env` file with required information (except the mongoDb connection string). 
 
-Nx Cloud pairs with Nx in order to enable you to build and test code more rapidly, by up to 10 times. Even teams that are new to Nx can connect to Nx Cloud and start saving time instantly.
+## Mongo DB
 
-Teams using Nx gain the advantage of building full-stack applications with their preferred framework alongside Nx’s advanced code generation and project dependency graph, plus a unified experience for both frontend and backend developers.
+This application requires that you have a MongoDb database running locally or using the cloud based solutions such as [Atlas](https://www.mongodb.com/atlas/database). Once you have an instance of MongoDb running you can generate the connection string. On [Atlas](https://www.mongodb.com/atlas/database) this can be obtained from the Dasboard via the (Project >> Databases >> Cluster0 >>) "Connect" button. In the subsequent dialog that appears choose "Connect your application". This should reveal a connection string template of type - `mongodb+srv://<username>:<password>@<address.com>/<database_name>?retryWrites=true&w=majority`. You will need to copy this string (and replace the template values with your own values) and paste it in the `.env` file, replacing the generated value for `MONGO_CONNECTION_STRING`.
 
-Visit [Nx Cloud](https://nx.app/) to learn more.
+## Running the application
+
+Once the above steps have been implemented. Ensure that you have NX installed globally by running `npm install -g nx`. You'll need to open 2 terminal windows in the shell of your choosing and cd into the directory where the code was cloned. Once in the root of this directory, in one shell you can run `nx serve api`, this will spin up the API and connect it to the MongoDB, and in the other run `nx serve api-gateway-admin`, which will spin up the gateway admin client(dashboard). Now you can will see the App running on http://localhost:4200.
+**Note:** Only the first user and an authenticated Admin can register a new user. The very first user to register on the database is automatically considered an admin. 
+
+
+## Author
+#### Shalom Sam
++ Checkout my <a href="https://shalomsam.com" title="Full Stack Web Developer, UI/UX Javascript Specialist" target="_blank">Full Stack Web Developer Website</a>
++ You can checkout this <a href="http://react.shalomsam.com" title="Full Stack Developer, Angular Portfolio" target="_blank">React Portfolio here</a>
++ A scope of my work @ <a title="Web Software Developer Portfolio" target="_blank" href="https://react.shalomsam.com/portfolio">React Portfolio</a>
+
+
+## License
+MIT. Copyright (c) 2018 Shalom Sam.
+
+

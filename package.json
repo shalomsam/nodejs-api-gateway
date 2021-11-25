@@ -24,7 +24,7 @@
     "workspace-generator": "nx workspace-generator",
     "dep-graph": "nx dep-graph",
     "help": "nx help",
-    "authSetup": "ts-node --project tools/tsconfig.tools.json tools/scripts/authSetup",
+    "authSetup": "ts-node --project tools/tsconfig.tools.json tools/scripts/authSetup -- --app='api'",
     "serve:gateway-apps": "nx run-many --parallel --target=serve --projects=api,api-gateway-admin"
   },
   "private": true,
@@ -69,7 +69,7 @@
     "@nrwl/jest": "11.5.2",
     "@nrwl/linter": "11.5.2",
     "@nrwl/node": "11.5.2",
-    "@nrwl/nx-cloud": "latest",
+    "@nrwl/nx-cloud": "12.2.7",
     "@nrwl/react": "11.5.2",
     "@nrwl/storybook": "^12.0.8",
     "@nrwl/tao": "11.5.2",

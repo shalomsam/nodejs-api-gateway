@@ -50,12 +50,12 @@ export const apiNotFoundHandler = function (req, res) {
   res.status(404);
 
   // respond with html page
-  if (req.headers['content-type'].indexOf('html') > -1) {
+  if (req?.headers['content-type']?.indexOf('html') > -1) {
     return res.type('txt').send('Not found');
   }
 
   // respond with json
-  if (req.headers['content-type'].indexOf('json') > -1) {
+  if (req?.headers['content-type']?.indexOf('json') > -1) {
     return res.send(ApiResponse.NOTFOUND);
   }
 

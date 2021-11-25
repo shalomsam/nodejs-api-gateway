@@ -40,7 +40,13 @@ function authSetup() {
     const fileContent = `
     ADMIN_CLIENT_API_KEY="${adminClientKeys}"
     ADMIN_CLIENT_API_SECRET="${adminClientSecret}"
-    `.replace(/ +/g, "").trim();
+    NX_REACT_APP_ADMIN_CLIENT_API_KEY="${adminClientKeys}"
+    NX_REACT_APP_API_KEY_HANDLE="X-API-KEY"
+    NX_REACT_APP_ACCESS_TOKEN_HANDLE="ACCESS_TOKEN"
+    MONGO_CONNECTION_STRING="Use your mongodb connection string"
+    `
+    .replace(/ +/g, '')
+    .trim();
 
     // If .env doesn't exist 
     if (!fileExists) {
